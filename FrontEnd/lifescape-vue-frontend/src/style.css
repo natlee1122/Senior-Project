@@ -1,0 +1,322 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap');
+
+:root{
+  --ink:#18343a; --muted:#71858a; --teal:#2f9d91; --teal-dark:#217d74;
+  --mint:#e8f5f0; --cream:#fbfaf6; --line:#e6ece9; --white:#fff;
+  font-family:'DM Sans',sans-serif; color:var(--ink); background:#f7f8f5;
+}
+*{box-sizing:border-box} body{margin:0;background:#f7f8f5} button,a{font:inherit}
+a{text-decoration:none;color:inherit}.app-shell{display:flex;min-height:100vh}
+.sidebar{width:230px;background:#fff;border-right:1px solid var(--line);padding:28px 18px;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Plus Jakarta Sans';font-weight:700;font-size:21px;padding:4px 10px 38px}
+.brand-mark{width:31px;height:31px;border-radius:10px;background:var(--mint);color:var(--teal);display:grid;place-items:center;font-size:25px}
+.nav{display:flex;flex-direction:column;gap:6px}.nav-item{display:flex;align-items:center;gap:13px;padding:12px 13px;border-radius:12px;color:#6d8084;font-weight:600;font-size:14px}
+.nav-item:hover,.nav-item.router-link-active{background:var(--mint);color:var(--teal-dark)}
+.nav-icon{width:20px;text-align:center;font-size:17px}.sidebar-bottom{margin-top:auto}.streak-card{background:#fbf8ee;border:1px solid #f1ead6;border-radius:16px;padding:14px;font-size:12px;color:#776d52;position:relative}.streak-card strong{display:block;color:var(--ink);font-size:17px;margin-top:5px}.mini-pet{position:absolute;right:12px;bottom:8px;font-size:28px}
+.main{margin-left:230px;width:calc(100% - 230px);min-height:100vh}.topbar{height:72px;background:rgba(255,255,255,.86);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 42px;position:sticky;top:0;z-index:5;backdrop-filter:blur(12px)}
+.top-actions{display:flex;align-items:center;gap:16px}.top-actions button{border:0;background:none;color:#71858a;font-size:21px;cursor:pointer}.avatar{width:34px;height:34px;border-radius:50%;background:#e9c7ad;display:grid;place-items:center;font-weight:700;color:#65493a}
+.page{max-width:1280px;margin:auto;padding:38px 44px 60px}.welcome h1{font-family:'Plus Jakarta Sans';font-size:29px;margin:0 0 5px}.welcome p,.page-heading p{margin:0;color:var(--muted);font-size:14px}.stats-row{display:grid;grid-template-columns:1fr 180px 180px;gap:16px;margin:28px 0 34px}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 5px 22px rgba(25,60,58,.035)}.level-card{padding:22px 24px}.level-top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:12px}.level-top span{color:var(--muted)}.progress{height:8px;background:#edf1ef;border-radius:99px;overflow:hidden}.progress span{display:block;height:100%;background:var(--teal);border-radius:99px}.stat-card{display:flex;align-items:center;gap:12px;padding:20px}.stat-card strong{display:block;font-size:20px}.stat-card small{display:block;color:var(--muted);margin-top:2px}.coin,.check{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:#fff4d5;color:#d99b1e}.check{background:#e8f5f0;color:var(--teal)}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:16px}.section-head h2{font-family:'Plus Jakarta Sans';font-size:19px;margin:0 0 4px}.section-head p{margin:0;color:var(--muted);font-size:13px}.section-head a{font-size:13px;color:var(--teal-dark);font-weight:700}
+.quest-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.quest-card{overflow:hidden;background:#fff;border:1px solid var(--line);border-radius:18px}.quest-image{height:145px;position:relative;overflow:hidden}.forest{background:linear-gradient(#9ed5e5 0 43%,#6fb18a 43% 68%,#477e5f 68%)}.desk{background:linear-gradient(135deg,#e7dcc7,#a5c8c0)}.camera{background:linear-gradient(#9ccfe0 0 48%,#a9cf91 48% 100%)}.sun{width:54px;height:54px;border-radius:50%;background:#ffe7a4;position:absolute;right:27px;top:22px;box-shadow:0 0 35px rgba(255,231,164,.8)}.mountain{position:absolute;bottom:38px;left:15%;width:70%;height:72px;background:#7ca89b;clip-path:polygon(0 100%,34% 20%,52% 57%,68% 0,100% 100%)}.hill{position:absolute;bottom:-1px;left:-10%;width:125%;height:62px;background:#55946d;border-radius:50% 50% 0 0}
+.quest-body{padding:17px}.pill{display:inline-block;background:#e8f5f0;color:#278377;border-radius:999px;padding:5px 9px;font-size:10px;font-weight:700}.quest-body h3{font-family:'Plus Jakarta Sans';font-size:15px;line-height:1.35;margin:10px 0}.reward-line{display:flex;gap:12px;color:#657a7d;font-size:11px;font-weight:700;margin:10px 0 14px}.primary-btn,.secondary-btn{border:0;border-radius:11px;padding:11px 16px;font-weight:700;cursor:pointer}.primary-btn{display:block;width:100%;background:var(--teal);color:#fff}.primary-btn:hover{background:var(--teal-dark)}.secondary-btn{background:#eef7f4;color:var(--teal-dark)}
+.bottom-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;margin-top:18px}.recommendation{padding:25px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(120deg,#f3fbf7,#fff)}.eyebrow{font-size:10px;letter-spacing:.14em;color:#6c8a89;font-weight:700}.recommendation h2{font-family:'Plus Jakarta Sans';font-size:21px;max-width:470px;margin:8px 0}.recommendation p{color:var(--muted);font-size:13px;max-width:520px;line-height:1.6}.big-pet{font-size:72px;margin:0 25px}.weekly{padding:25px}.weekly h3{font-size:17px;margin:8px 0 20px}.week-bars{height:80px;display:flex;align-items:end;gap:10px}.week-bars span{width:22px;background:#83c5b9;border-radius:7px 7px 2px 2px}.weekly small{color:var(--muted)}
+.page-heading{display:flex;justify-content:space-between;align-items:end;margin-bottom:26px}.page-heading h1{font-family:'Plus Jakarta Sans';font-size:31px;margin:5px 0}.filters{display:flex;gap:8px;margin-bottom:20px}.filter{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 15px;color:var(--muted);cursor:pointer}.filter.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+.large-quest-list{display:grid;gap:16px}.large-quest{display:grid;grid-template-columns:290px 1fr;overflow:hidden}.large-quest .quest-image{height:auto;min-height:245px}.large-quest-content{padding:27px}.large-quest-content h2{font-family:'Plus Jakarta Sans';margin:11px 0 7px}.large-quest-content p{color:var(--muted);line-height:1.6;max-width:700px}.quest-meta{display:flex;gap:18px;color:var(--muted);font-size:12px}.large-quest .primary-btn{width:180px;margin-top:12px}.toast{position:fixed;right:30px;bottom:30px;background:#18343a;color:#fff;padding:14px 18px;border-radius:12px;box-shadow:0 10px 30px #0002}
+.world-hero{display:grid;grid-template-columns:1.3fr 1fr;background:#fff;border:1px solid var(--line);border-radius:22px;overflow:hidden}.world-art{min-height:430px;background:linear-gradient(#9ed7e8 0 50%,#84bd7d 50%);position:relative}.world-sun{width:80px;height:80px;background:#ffe5a1;border-radius:50%;position:absolute;top:65px;right:100px}.world-mountain{position:absolute;bottom:85px;left:8%;width:85%;height:180px;background:#689a91;clip-path:polygon(0 100%,20% 40%,37% 65%,57% 5%,75% 55%,100% 100%)}.world-house{position:absolute;bottom:70px;left:43%;font-size:105px;color:#8c5c43}.world-copy{padding:55px;display:flex;flex-direction:column;justify-content:center}.world-copy h2{font-family:'Plus Jakarta Sans';font-size:30px}.world-copy p{color:var(--muted);line-height:1.7}.world-copy .primary-btn{width:180px;margin-top:12px}
+.inventory-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.item-card{text-align:center;padding:30px}.item-icon{height:120px;display:grid;place-items:center;font-size:68px;background:#f5faf8;border-radius:15px;margin-bottom:15px}.item-card h3{margin:5px 0;font-family:'Plus Jakarta Sans';font-size:15px}.item-card small{color:var(--muted)}
+.profile-card{overflow:hidden}.profile-cover{height:210px;background:linear-gradient(135deg,#9bd3df,#b9d8ad 50%,#e8d8b9)}.profile-main{display:flex;gap:20px;padding:0 32px 22px;align-items:end;margin-top:-50px}.profile-avatar{width:100px;height:100px;border-radius:50%;background:#e7c5ad;border:6px solid #fff;display:grid;place-items:center;font-size:36px;font-weight:700}.profile-info h1{font-family:'Plus Jakarta Sans';margin:0}.profile-info p{color:var(--muted);margin:5px 0 12px}.profile-tabs{display:flex;gap:30px;padding:0 32px;border-bottom:1px solid var(--line)}.profile-tabs span{padding:15px 4px;color:var(--muted);font-size:13px}.profile-tabs .active{color:var(--teal-dark);font-weight:700;border-bottom:2px solid var(--teal)}.avatar-editor{display:grid;grid-template-columns:1fr 1fr;padding:45px;gap:40px}.character{font-size:150px;text-align:center}.choices{display:grid;grid-template-columns:repeat(3,80px);gap:15px;align-content:center}.choices button{height:80px;border:1px solid var(--line);background:#fafcfa;border-radius:15px;font-size:32px;cursor:pointer}
+@media(max-width:900px){.sidebar{width:76px;padding:25px 10px}.brand span,.nav-item span:last-child,.streak-card{display:none}.brand{justify-content:center;padding-bottom:30px}.main{margin-left:76px;width:calc(100% - 76px)}.page{padding:28px}.stats-row{grid-template-columns:1fr 1fr}.level-card{grid-column:1/-1}.quest-grid{grid-template-columns:1fr 1fr}.large-quest{grid-template-columns:1fr}.world-hero,.bottom-grid,.avatar-editor{grid-template-columns:1fr}}
+@media(max-width:600px){.topbar{padding:0 20px}.page{padding:24px 18px}.quest-grid,.inventory-grid{grid-template-columns:1fr}.stats-row{grid-template-columns:1fr}.level-card{grid-column:auto}.bottom-grid{grid-template-columns:1fr}.page-heading{align-items:start;gap:15px;flex-direction:column}.sidebar{display:none}.main{margin-left:0;width:100%}}
+
+/* Login page */
+.login-shell {
+  min-height: 100vh;
+}
+
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 40px 20px;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 15% 15%, rgba(47, 157, 145, .12), transparent 30%),
+    radial-gradient(circle at 85% 80%, rgba(232, 245, 240, .95), transparent 34%),
+    var(--cream);
+}
+
+.login-background-shape {
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.shape-one {
+  width: 320px;
+  height: 320px;
+  right: -120px;
+  top: -100px;
+  background: rgba(47, 157, 145, .08);
+}
+
+.shape-two {
+  width: 260px;
+  height: 260px;
+  left: -110px;
+  bottom: -100px;
+  background: rgba(47, 157, 145, .07);
+}
+
+.login-card {
+  width: min(100%, 450px);
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, .96);
+  border: 1px solid #e5ece8;
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 24px 70px rgba(24, 52, 58, .12);
+}
+
+.login-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 34px;
+}
+
+.login-brand-mark {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  color: white;
+  background: var(--teal);
+  font-size: 23px;
+}
+
+.login-heading {
+  text-align: center;
+}
+
+.login-heading .eyebrow {
+  margin: 0 0 9px;
+  color: var(--teal-dark);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+
+.login-heading h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(28px, 5vw, 34px);
+  line-height: 1.12;
+  letter-spacing: -.03em;
+}
+
+.login-subtitle {
+  margin: 13px auto 0;
+  max-width: 340px;
+  color: #728187;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.login-form {
+  margin-top: 30px;
+}
+
+.login-form label,
+.password-row label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.login-form input[type="email"],
+.login-form input[type="password"],
+.login-form input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  height: 48px;
+  border: 1px solid #dce6e2;
+  border-radius: 12px;
+  background: #fbfdfc;
+  color: var(--ink);
+  padding: 0 14px;
+  font: inherit;
+  outline: none;
+  transition: border-color .18s, box-shadow .18s, background .18s;
+}
+
+.login-form input:focus {
+  border-color: var(--teal);
+  background: white;
+  box-shadow: 0 0 0 4px rgba(47, 157, 145, .11);
+}
+
+.login-form input::placeholder {
+  color: #a2afb2;
+}
+
+.password-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+}
+
+.password-row label {
+  margin-bottom: 8px;
+}
+
+.forgot-button,
+.signup-text button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--teal-dark);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.password-input-wrap {
+  position: relative;
+}
+
+.password-input-wrap input {
+  padding-right: 68px !important;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  background: transparent;
+  color: var(--teal-dark);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.remember-row {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  color: #66767b !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer;
+}
+
+.remember-row input {
+  accent-color: var(--teal);
+}
+
+.login-error {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff3f1;
+  color: #b65d52;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.login-button,
+.demo-button {
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s, background .15s;
+}
+
+.login-button {
+  margin-top: 20px;
+  border: 0;
+  background: var(--teal);
+  color: white;
+  box-shadow: 0 9px 22px rgba(47, 157, 145, .2);
+}
+
+.login-button:hover {
+  background: var(--teal-dark);
+  transform: translateY(-1px);
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 23px 0;
+  color: #a1abad;
+  font-size: 11px;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: #e5ece9;
+}
+
+.demo-button {
+  border: 1px solid #d6e5e0;
+  background: #f3faf7;
+  color: var(--teal-dark);
+}
+
+.demo-button:hover {
+  background: #e8f5f0;
+}
+
+.signup-text {
+  margin: 24px 0 0;
+  text-align: center;
+  color: #718085;
+  font-size: 13px;
+}
+
+.signup-text button {
+  margin-left: 3px;
+  font-size: 13px;
+}
+
+.demo-note {
+  margin: 17px 0 0;
+  text-align: center;
+  color: #a0abad;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+@media (max-width: 520px) {
+  .login-page {
+    padding: 20px 14px;
+  }
+
+  .login-card {
+    padding: 30px 22px;
+    border-radius: 20px;
+  }
+}
