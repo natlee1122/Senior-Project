@@ -7,6 +7,9 @@ erDiagram
     USER_QUEST ||--o{ EVENT_LOG : produces
     USER ||--o{ INVENTORY_ITEM : owns
     PROP ||--o{ INVENTORY_ITEM : defines
+    USER ||--o{ RECOMMENDATION_IMPRESSION : shown
+    QUEST ||--o{ RECOMMENDATION_IMPRESSION : recommended
+    USER_QUEST |o--o| RECOMMENDATION_IMPRESSION : attributed
 
     USER {
         int id PK
@@ -44,6 +47,20 @@ erDiagram
         int prop_id FK
         timestamp acquired_at
         boolean active
+    }
+    RECOMMENDATION_IMPRESSION {
+        int id PK
+        int user_id FK
+        int quest_id FK
+        int assignment_id FK,UK "nullable"
+        datetime recommended_at
+        datetime shown_at "nullable until confirmed"
+        varchar recommender
+        varchar model_version
+        varchar policy_version
+        float selection_probability
+        json feature_snapshot
+        json decision_context
     }
     EVENT_LOG {
         int id PK
