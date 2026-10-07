@@ -1,81 +1,103 @@
 <template>
-  <div class="page">
-    <section class="welcome">
-      <div>
-        <h1>Good morning, Amanda! <span>☀️</span></h1>
-        <p>Another day, another adventure.</p>
-      </div>
-    </section>
+  <div>
+    <h1 class="text-h4 mb-1">Good morning, Amanda! <span>☀️</span></h1>
+    <p class="text-body-2 text-muted">Another day, another adventure.</p>
 
-    <section class="stats-row">
-      <div class="card level-card">
-        <div class="level-top"><strong>Lv. 3</strong><span>320 / 500 XP</span></div>
-        <div class="progress"><span style="width:64%"></span></div>
-      </div>
-      <div class="card stat-card">
-        <span class="coin">●</span>
-        <div><strong>420</strong><small>Coins</small></div>
-      </div>
-      <div class="card stat-card">
-        <span class="check">✓</span>
-        <div><strong>12</strong><small>Items</small></div>
-      </div>
-    </section>
-
-    <section class="section-head">
-      <div>
-        <h2>Today's Quests</h2>
-        <p>Small actions. Real progress.</p>
-      </div>
-      <RouterLink to="/quests">View all →</RouterLink>
-    </section>
-
-    <section class="quest-grid">
-      <article v-for="quest in quests" :key="quest.title" class="quest-card">
-        <div class="quest-image" :class="quest.theme">
-          <div class="sun"></div>
-          <div class="mountain"></div>
-          <div class="hill"></div>
-        </div>
-        <div class="quest-body">
-          <span class="pill">{{ quest.category }}</span>
-          <h3>{{ quest.title }}</h3>
-          <div class="reward-line">
-            <span>★ +{{ quest.xp }} XP</span>
-            <span>● +{{ quest.coins }}</span>
+    <v-row dense class="mt-5 mb-8">
+      <v-col cols="12" md>
+        <v-card class="px-6 py-5 h-100">
+          <div class="d-flex justify-space-between text-body-2 mb-3">
+            <strong>Lv. 3</strong><span class="text-muted">320 / 500 XP</span>
           </div>
-          <RouterLink :to="'/quests'" class="primary-btn">Start</RouterLink>
-        </div>
-      </article>
-    </section>
+          <v-progress-linear model-value="64" color="primary" bg-color="#edf1ef" bg-opacity="1" height="8" rounded />
+        </v-card>
+      </v-col>
+      <v-col v-for="stat in stats" :key="stat.label" cols="12" sm="6" md="auto">
+        <v-card :width="mdAndUp ? 180 : undefined" class="pa-5 d-flex align-center ga-3 h-100">
+          <v-avatar :color="stat.color" rounded="lg" size="36">{{ stat.icon }}</v-avatar>
+          <div>
+            <div class="text-h6 font-weight-bold">{{ stat.value }}</div>
+            <div class="text-caption text-muted">{{ stat.label }}</div>
+          </div>
+        </v-card>
+      </v-col>
+    </v-row>
 
-    <section class="bottom-grid">
-      <div class="card recommendation">
-        <div>
-          <span class="eyebrow">YOUR NEXT ADVENTURE</span>
-          <h2>Make today a little more interesting.</h2>
-          <p>Your quests are personalized from your interests and recent activity.</p>
-          <RouterLink to="/quests" class="secondary-btn">Explore quests</RouterLink>
-        </div>
-        <div class="big-pet">🦊</div>
+    <div class="d-flex justify-space-between align-end mb-4">
+      <div>
+        <h2 class="text-h5 mb-1">Today's Quests</h2>
+        <p class="text-body-2 text-muted">Small actions. Real progress.</p>
       </div>
+      <v-btn variant="text" color="primary-dark" class="px-0" min-width="0" @click="goToQuests">View all →</v-btn>
+    </div>
 
-      <div class="card weekly">
-        <span class="eyebrow">THIS WEEK</span>
-        <h3>7 / 10 quests completed</h3>
-        <div class="week-bars">
-          <span v-for="(n, i) in [2,3,1,3,2,0,1]" :key="i" :style="{height: (n*18+10)+'px'}"></span>
-        </div>
-        <small>Keep going. Your streak is growing.</small>
-      </div>
-    </section>
+    <v-row dense>
+      <v-col v-for="quest in quests" :key="quest.title" cols="12" sm="6" md="4">
+        <v-card class="h-100">
+          <QuestScene :theme="quest.theme" height="145" />
+          <div class="pa-4">
+            <v-chip size="x-small" class="font-weight-bold">{{ quest.category }}</v-chip>
+            <h3 class="text-h6 my-2">{{ quest.title }}</h3>
+            <div class="d-flex ga-3 text-caption font-weight-bold text-muted my-3">
+              <span>★ +{{ quest.xp }} XP</span><span>● +{{ quest.coins }}</span>
+            </div>
+            <v-btn block size="large" color="primary" @click="goToQuests">Start</v-btn>
+          </div>
+        </v-card>
+      </v-col>
+    </v-row>
+
+    <v-row dense class="mt-1">
+      <v-col cols="12" md="7">
+        <v-card class="recommendation pa-6 d-flex align-center justify-space-between h-100">
+          <div>
+            <span class="text-overline text-muted">YOUR NEXT ADVENTURE</span>
+            <h2 class="text-h5 my-2 recommendation-title">Make today a little more interesting.</h2>
+            <p class="text-body-2 text-muted mb-4">Your quests are personalized from your interests and recent activity.</p>
+            <v-btn size="large" color="secondary" @click="goToQuests">Explore quests</v-btn>
+          </div>
+          <div class="big-pet mx-6">🦊</div>
+        </v-card>
+      </v-col>
+      <v-col cols="12" md="5">
+        <v-card class="pa-6 h-100">
+          <span class="text-overline text-muted">THIS WEEK</span>
+          <h3 class="text-h6 mt-2 mb-5">7 / 10 quests completed</h3>
+          <div class="d-flex align-end ga-2 week-bars">
+            <span v-for="(n, i) in weekly" :key="i" class="bar" :style="{ height: n * 18 + 10 + 'px' }" />
+          </div>
+          <small class="text-muted">Keep going. Your streak is growing.</small>
+        </v-card>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
+import { useDisplay } from 'vuetify'
+import QuestScene from '../components/QuestScene.vue'
+
+const router = useRouter()
+const { mdAndUp } = useDisplay()
+const goToQuests = () => router.push('/quests')
+
+const stats = [
+  { label: 'Coins', value: 420, icon: '●', color: 'gold' },
+  { label: 'Items', value: 12, icon: '✓', color: 'secondary' },
+]
 const quests = [
   { title: 'Take a 20 minute walk', category: 'Exercise', xp: 50, coins: 20, theme: 'forest' },
   { title: 'Study for 30 minutes', category: 'Study', xp: 40, coins: 15, theme: 'desk' },
-  { title: 'Take a picture of something interesting', category: 'Explore', xp: 30, coins: 10, theme: 'camera' }
+  { title: 'Take a picture of something interesting', category: 'Explore', xp: 30, coins: 10, theme: 'camera' },
 ]
+const weekly = [2, 3, 1, 3, 2, 0, 1]
 </script>
+
+<style scoped>
+.recommendation { background: linear-gradient(120deg, #f3fbf7, #fff); }
+.recommendation-title { max-width: 470px; }
+.big-pet { font-size: 72px; }
+.week-bars { height: 80px; }
+.bar { width: 22px; background: #83c5b9; border-radius: 7px 7px 2px 2px; }
+</style>
