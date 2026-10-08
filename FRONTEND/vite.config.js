@@ -7,4 +7,12 @@ export default defineConfig({
     vue(),
     vuetify({ autoImport: true, styles: { configFile: 'src/styles/settings.scss' } }),
   ],
+  optimizeDeps: {
+    include: ['vue', 'vue-router', 'vuetify'],
+  },
+  server: {
+    warmup: {
+      clientFiles: ['./src/main.js', './src/App.vue', './src/views/*.vue', './src/components/*.vue'],
+    },
+  },
 })
