@@ -1,3 +1,8 @@
 .github/
 Design_Doc.md
 ERD.png
+**/node_modules/
+node_modules/
+dist/
+.env
+.DS_Store
