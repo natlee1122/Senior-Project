@@ -3,10 +3,10 @@
     <v-card>
       <div class="cover" />
       <div class="d-flex align-end ga-5 px-8 pb-5 profile-main">
-        <v-avatar color="sand" size="100" class="profile-avatar text-h4">A</v-avatar>
+        <v-avatar color="sand" size="100" class="profile-avatar text-h4">{{ initial }}</v-avatar>
         <div>
-          <h1 class="text-h4">Amanda Hsu</h1>
-          <p class="text-muted mt-1 mb-3">Level 3 · 320 / 500 XP</p>
+          <h1 class="text-h4">{{ user?.name || 'Adventurer' }}</h1>
+          <p class="text-muted mt-1 mb-3">Level {{ stats.level }} · {{ stats.xpIntoLevel }} / 500 XP</p>
           <v-btn size="large" color="secondary" @click="notify('Profile editing is coming soon.')">Edit Profile</v-btn>
         </div>
       </div>
@@ -40,7 +40,23 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import api from '../api'
+import { getInitial } from '../utils/user'
+
+const user = ref(null)
+const stats = ref({ level: 1, xpIntoLevel: 0 })
+const initial = computed(() => getInitial(user.value))
+
+onMounted(async () => {
+  try {
+    const [me, statData] = await Promise.all([api.users.me(), api.users.stats()])
+    user.value = me
+    stats.value = statData
+  } catch (err) {
+    notify(err.message)
+  }
+})
 
 const snackbar = ref(false)
 const message = ref('')

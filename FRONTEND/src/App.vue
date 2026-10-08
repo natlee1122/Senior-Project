@@ -44,7 +44,8 @@
           <v-btn icon variant="text" size="32" color="muted" aria-label="Notifications" @click="showNotice('No new notifications.')">
             <span class="text-h6">♧</span>
           </v-btn>
-          <v-avatar color="sand" size="34" class="font-weight-bold cursor-pointer" role="button" tabindex="0" @click="$router.push('/profile')">A</v-avatar>
+          <v-avatar color="sand" size="34" class="font-weight-bold cursor-pointer" role="button" tabindex="0" @click="$router.push('/profile')">{{ initial }}</v-avatar>
+          <v-btn variant="text" size="small" color="primary-dark" @click="handleLogout">Log out</v-btn>
         </div>
       </v-app-bar>
 
@@ -60,14 +61,38 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useDisplay } from 'vuetify'
+import api from './api'
+import { getInitial } from './utils/user'
 
 const route = useRoute()
+const router = useRouter()
 const { xs, smAndDown } = useDisplay()
 
-const isLoginPage = computed(() => route.path === '/login')
+const isLoginPage = computed(() => ['/login', '/signup'].includes(route.path))
+const user = ref(null)
+const initial = computed(() => (user.value ? getInitial(user.value) : ''))
+
+// App.vue stays mounted while you move between pages, so load the user once
+// after login (when we leave /login or /signup) and clear it on those pages.
+watch(
+  () => route.path,
+  async () => {
+    if (isLoginPage.value) {
+      user.value = null
+    } else if (!user.value) {
+      try {
+        user.value = await api.users.me()
+      } catch {
+        user.value = null
+      }
+    }
+  },
+  { immediate: true },
+)
+
 const notice = ref('')
 const noticeOpen = ref(false)
 
@@ -82,6 +107,11 @@ const navItems = [
 function showNotice(message) {
   notice.value = message
   noticeOpen.value = true
+}
+
+async function handleLogout() {
+  await api.auth.logout()
+  router.push('/login')
 }
 </script>
 

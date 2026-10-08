@@ -1,3 +1,4 @@
+/* 全域只留兩件事：字體、頁面底色。其餘樣式都由 Vuetify（theme / SASS 設定 / 元件）與各元件 scoped CSS 負責。 */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 
 .cursor-pointer { cursor: pointer; }

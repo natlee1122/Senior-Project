@@ -1,4 +1,4 @@
-<!-- Picture for tasks -->
+<!-- 任務卡片的插畫（天空 + 太陽 + 山 + 草地），主題由 theme 決定：forest | desk | camera -->
 <template>
   <v-sheet :class="['scene', theme]" color="transparent" rounded="0">
     <div class="sun" />

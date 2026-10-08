@@ -11,7 +11,7 @@
       <div class="text-center">
         <p class="text-overline text-primary-dark mb-2">WELCOME BACK</p>
         <h1 class="text-h4">Log in to your Lifescape</h1>
-        <p class="text-body-2 text-muted mx-auto mt-3 login-subtitle">Continue your journey, complete quests, and build your world.</p>
+        <p class="text-body-2 text-muted mx-auto mt-3 login-subtitle">Continue your journey, complete quests, and keep your rewards.</p>
       </div>
 
       <v-form class="mt-7" @submit.prevent="handleLogin">
@@ -20,7 +20,6 @@
 
         <div class="d-flex align-center justify-space-between mt-4">
           <label for="password" class="field-label">Password</label>
-          <v-btn variant="text" size="small" color="primary-dark" class="px-0 mb-2" min-width="0" @click="forgotPassword">Forgot password?</v-btn>
         </div>
         <v-text-field
           id="password"
@@ -52,7 +51,7 @@
         Don't have an account?
         <v-btn variant="text" size="small" color="primary-dark" min-width="0" class="px-1" @click="goToSignup">Create one</v-btn>
       </p>
-      <p class="text-center mt-4 demo-note">Frontend demo: any valid email + 4+ character password will work.</p>
+      <p class="text-center mt-4 demo-note">Demo: demo@lifescape.app / lifescape</p>
     </v-card>
   </div>
 </template>
@@ -60,6 +59,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '../api'
 
 const router = useRouter()
 const email = ref('')
@@ -71,25 +71,31 @@ const error = ref('')
 const emailRule = (v) => (v && v.includes('@')) || 'Please enter a valid email address.'
 const passwordRule = (v) => (v && v.length >= 4) || 'Password must be at least 4 characters.'
 
-function finishLogin(userEmail) {
-  const storage = rememberMe.value ? localStorage : sessionStorage
-  storage.setItem('lifescape-auth', 'true')
-  storage.setItem('lifescape-user', userEmail)
-  router.push('/')
-}
-function handleLogin() {
+async function handleLogin() {
   error.value = ''
   if (!email.value.includes('@')) { error.value = 'Please enter a valid email address.'; return }
   if (password.value.length < 4) { error.value = 'Password must be at least 4 characters.'; return }
-  finishLogin(email.value)
+
+  try {
+    await api.auth.login({ email: email.value, password: password.value })
+    router.push('/')
+  } catch (err) {
+    error.value = err.message
+  }
 }
-function demoLogin() {
-  email.value = 'demo@lifescape.app'
-  password.value = 'lifescape'
-  finishLogin(email.value)
+
+async function demoLogin() {
+  try {
+    await api.auth.demoLogin()
+    router.push('/')
+  } catch (err) {
+    error.value = err.message
+  }
 }
-const forgotPassword = () => { error.value = 'Password reset will be connected to the backend later.' }
-const goToSignup = () => { error.value = 'Sign-up is the next frontend flow to add.' }
+
+function goToSignup() {
+  router.push('/signup')
+}
 </script>
 
 <style scoped>

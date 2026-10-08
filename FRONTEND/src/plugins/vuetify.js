@@ -3,7 +3,7 @@ import '@mdi/font/css/materialdesignicons.css'
 import { createVuetify } from 'vuetify'
 import { aliases, mdi } from 'vuetify/iconsets/mdi'
 
-// All design tokens
+// 所有「設計 token」集中在這：顏色、元件預設值、斷點。
 export default createVuetify({
   icons: { defaultSet: 'mdi', aliases, sets: { mdi } },
 
@@ -27,14 +27,14 @@ export default createVuetify({
           'on-secondary': '#278377',
           error: '#b65d52',
 
-          ink: '#18343a',      // dark text
-          muted: '#71858a',    // muted text
-          line: '#e6ece9',     // divider line
-          sand: '#e9c7ad',     // profile picture background
+          ink: '#18343a',      // 深色文字 / snackbar 背景
+          muted: '#71858a',    // 次要文字
+          line: '#e6ece9',     // 分隔線
+          sand: '#e9c7ad',     // 頭像底色
           'on-sand': '#65493a',
-          gold: '#fff4d5',     // coin background
+          gold: '#fff4d5',     // 金幣圖示底色
           'on-gold': '#d99b1e',
-          cream: '#fbf8ee',    // streak card
+          cream: '#fbf8ee',    // streak 卡片
           'on-cream': '#776d52',
         },
         variables: {
@@ -46,6 +46,7 @@ export default createVuetify({
     },
   },
 
+  // 全域元件預設值：寫一次，不必每個 <v-btn> 都重複 / 不必再 !important
   defaults: {
     VBtn: { variant: 'flat', rounded: 'lg', ripple: false },
     VCard: { elevation: 0, rounded: 'xl', border: true },

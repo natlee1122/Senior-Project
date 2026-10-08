@@ -1,14 +1,16 @@
+// Vuetify SASS 設定：在「源頭」調整 Vuetify，而不是用 !important 蓋過去。
 @use 'vuetify/settings' with (
   $body-font-family: ('DM Sans', sans-serif),
   $heading-font-family: ('Plus Jakarta Sans', 'DM Sans', sans-serif),
 
-  // rounded-lg=12(button/enter box)、rounded-xl=18(card)、rounded-xxl=24(login)
+  // 圓角：rounded-lg=12(按鈕/輸入框/導覽項)、rounded-xl=18(卡片)、rounded-xxl=24(登入卡片)
   $border-radius-root: 12px,
   $rounded: ('lg': 12px, 'xl': 18px, 'xxl': 24px),
 
-  // v-row dense = 16px
+  // v-row dense 的間距 = 16px（對應原本 grid gap）
   $form-grid-gutter: 16px,
 
+  // 斷點對齊原本 CSS 的 @media(max-width:900px / 600px)
   $grid-breakpoints: ('xs': 0, 'sm': 601px, 'md': 901px, 'lg': 1280px, 'xl': 1920px, 'xxl': 2560px),
 
   $typography: (
