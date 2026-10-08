@@ -1,7 +1,10 @@
 <template>
   <div>
     <PageHeading eyebrow="DAILY ADVENTURES" title="Quests" subtitle="Complete small real-world activities and earn rewards.">
-      <v-chip color="secondary" size="large" class="font-weight-bold">{{ stats.completedToday }} / {{ quests.length }} today</v-chip>
+      <div class="d-flex align-center ga-3">
+        <v-chip color="secondary" size="large" class="font-weight-bold">{{ stats.completedToday }} / {{ quests.length }} today</v-chip>
+        <v-btn color="primary" @click="openAdd">+ Add quest</v-btn>
+      </div>
     </PageHeading>
 
     <v-alert color="secondary" variant="tonal" class="mb-5">
@@ -45,9 +48,15 @@
             :disabled="Boolean(completions[quest.id])"
             @click="openCompletion(quest)"
           >{{ completions[quest.id] ? 'Completed' : 'Complete Quest' }}</v-btn>
+          <v-btn variant="outlined" color="primary-dark" class="mt-1 ml-2 font-weight-bold" @click="openEdit(quest)">Edit</v-btn>
+          <v-btn variant="text" color="error" class="mt-1 ml-2" @click="askDelete(quest)">Delete</v-btn>
         </div>
       </v-card>
     </div>
+
+    <v-alert v-if="loaded && !filteredQuests.length" color="secondary" variant="tonal" class="mt-2">
+      No quests here yet. Use “+ Add quest” to create one.
+    </v-alert>
 
     <v-dialog v-model="dialog" max-width="520">
       <v-card rounded="xl">
@@ -78,6 +87,9 @@
       </v-card>
     </v-dialog>
 
+    <QuestFormDialog v-model="formDialog" :quest="editTarget" @saved="onChanged" />
+    <QuestDeleteDialog v-model="deleteDialog" :quest="questToDelete" @deleted="onChanged" />
+
     <v-snackbar v-model="snackbar" :timeout="2800">{{ message }}</v-snackbar>
   </div>
 </template>
@@ -87,6 +99,8 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useDisplay } from 'vuetify'
 import PageHeading from '../components/PageHeading.vue'
 import QuestScene from '../components/QuestScene.vue'
+import QuestFormDialog from '../components/QuestFormDialog.vue'
+import QuestDeleteDialog from '../components/QuestDeleteDialog.vue'
 import api from '../api'
 
 const { mdAndUp } = useDisplay()
@@ -104,6 +118,7 @@ const message = ref('')
 const quests = ref([])
 const completions = ref({})
 const stats = ref({ completedToday: 0 })
+const loaded = ref(false)
 
 onMounted(async () => {
   try {
@@ -118,8 +133,51 @@ onMounted(async () => {
   } catch (err) {
     message.value = err.message
     snackbar.value = true
+  } finally {
+    loaded.value = true
   }
 })
+
+const formDialog = ref(false)
+const editTarget = ref(null)
+const deleteDialog = ref(false)
+const questToDelete = ref(null)
+
+async function refresh() {
+  const [questList, statData, todayDone] = await Promise.all([
+    api.quests.list(),
+    api.users.stats(),
+    api.quests.todayCompletions(),
+  ])
+  quests.value = questList
+  stats.value = statData
+  completions.value = todayDone
+}
+
+function openAdd() {
+  editTarget.value = null
+  formDialog.value = true
+}
+
+function openEdit(quest) {
+  editTarget.value = quest
+  formDialog.value = true
+}
+
+function askDelete(quest) {
+  questToDelete.value = quest
+  deleteDialog.value = true
+}
+
+async function onChanged(msg) {
+  try {
+    await refresh()
+  } catch (err) {
+    msg = err.message
+  }
+  message.value = msg
+  snackbar.value = true
+}
 
 const filteredQuests = computed(() =>
   selectedFilter.value === 'All'

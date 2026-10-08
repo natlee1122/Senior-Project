@@ -71,6 +71,9 @@ function emptyUser(email, firstName = '', lastName = '') {
     coins: 0,
     completed: {},
     photos: {},
+    customQuests: [],
+    deletedQuests: [], // ids of built-in quests this user removed
+    questEdits: {}, // per-user edits of built-in quests, keyed by quest id
     createdAt: new Date().toISOString(),
   }
 }
@@ -83,6 +86,20 @@ function requireUser() {
   const user = readUsers()[currentEmail()]
   if (!user) throw new Error('Please log in again.')
   return user
+}
+
+const CUSTOM_REWARDS = {
+  Easy: { xp: 10, coins: 5 },
+  Medium: { xp: 20, coins: 10 },
+  Hard: { xp: 30, coins: 15 },
+}
+const CATEGORY_THEMES = { Exercise: 'forest', Study: 'desk', Explore: 'camera', Creative: 'camera' }
+
+function questsFor(user) {
+  const hidden = user.deletedQuests || []
+  const edits = user.questEdits || {}
+  const builtIn = DEFAULT_QUESTS.filter((q) => !hidden.includes(q.id)).map((q) => ({ ...q, ...(edits[q.id] || {}) }))
+  return [...builtIn, ...(user.customQuests || [])]
 }
 
 function saveUser(user) {
@@ -183,7 +200,100 @@ export const users = {
 export const quests = {
   async list() {
     await delay()
-    return DEFAULT_QUESTS
+    return questsFor(requireUser())
+  },
+
+  async create({ title, category, description = '', duration = '', difficulty = 'Easy' }) {
+    await delay()
+    const user = requireUser()
+    const cleanTitle = (title || '').trim()
+    if (!cleanTitle) throw new Error('Please enter a title.')
+    if (cleanTitle.length > 80) throw new Error('Title must be 80 characters or fewer.')
+
+    const reward = CUSTOM_REWARDS[difficulty] || CUSTOM_REWARDS.Easy
+    const quest = {
+      id: `custom-${Date.now()}`,
+      title: cleanTitle,
+      category: category || 'Explore',
+      description: description.trim() || 'A quest you created.',
+      duration: duration.trim() || 'Any time',
+      difficulty,
+      xp: reward.xp,
+      coins: reward.coins,
+      theme: CATEGORY_THEMES[category] || 'forest',
+      custom: true,
+    }
+    user.customQuests ||= []
+    user.customQuests.push(quest)
+    saveUser(user)
+    return quest
+  },
+
+  async update(questId, { title, category, description = '', duration = '', difficulty = 'Easy' }) {
+    await delay()
+    const user = requireUser()
+    const cleanTitle = (title || '').trim()
+    if (!cleanTitle) throw new Error('Please enter a title.')
+    if (cleanTitle.length > 80) throw new Error('Title must be 80 characters or fewer.')
+
+    const custom = (user.customQuests || []).find((q) => q.id === questId)
+    const builtIn = DEFAULT_QUESTS.find((q) => q.id === questId)
+    const hidden = (user.deletedQuests || []).includes(questId)
+
+    if (custom) {
+      const reward = CUSTOM_REWARDS[difficulty] || CUSTOM_REWARDS.Easy
+      Object.assign(custom, {
+        title: cleanTitle,
+        category: category || custom.category,
+        description: description.trim() || 'A quest you created.',
+        duration: duration.trim() || 'Any time',
+        difficulty,
+        xp: reward.xp,
+        coins: reward.coins,
+        theme: CATEGORY_THEMES[category] || custom.theme,
+      })
+    } else if (builtIn && !hidden) {
+      // Built-in quests keep their rewards, theme and difficulty; only text fields change.
+      user.questEdits ||= {}
+      user.questEdits[questId] = {
+        title: cleanTitle,
+        category: category || builtIn.category,
+        description: description.trim() || builtIn.description,
+        duration: duration.trim() || builtIn.duration,
+      }
+    } else {
+      throw new Error('Quest not found.')
+    }
+
+    saveUser(user)
+    return questsFor(user).find((q) => q.id === questId)
+  },
+
+  async remove(questId) {
+    await delay()
+    const user = requireUser()
+    const isCustom = (user.customQuests || []).some((q) => q.id === questId)
+    const isBuiltIn = DEFAULT_QUESTS.some((q) => q.id === questId)
+    if (!isCustom && !isBuiltIn) throw new Error('Quest not found.')
+
+    if (isCustom) {
+      user.customQuests = user.customQuests.filter((q) => q.id !== questId)
+    } else {
+      // Built-in quests are shared, so just hide them for this user.
+      user.deletedQuests ||= []
+      if (!user.deletedQuests.includes(questId)) user.deletedQuests.push(questId)
+    }
+
+    // Drop this quest's completion records and photos so counts stay consistent
+    // (XP and coins already earned are kept).
+    for (const day of Object.keys(user.completed || {})) {
+      delete user.completed[day][questId]
+    }
+    for (const key of Object.keys(user.photos || {})) {
+      if (key.endsWith(`:${questId}`)) delete user.photos[key]
+    }
+    saveUser(user)
+    return { deleted: true }
   },
 
   async todayCompletions() {
@@ -194,7 +304,7 @@ export const quests = {
   async complete(questId, photoData = '') {
     await delay()
     const user = requireUser()
-    const quest = DEFAULT_QUESTS.find((q) => q.id === questId)
+    const quest = questsFor(user).find((q) => q.id === questId)
     if (!quest) throw new Error('Quest not found.')
 
     const day = todayKey()
