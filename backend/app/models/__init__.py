@@ -4,5 +4,6 @@ from app.models.prop import Prop
 from app.models.quest import Quest
 from app.models.user import User
 from app.models.inventory import InventoryItem
+from app.recommender.models import RecommendationImpression
 
-__all__ = ["EventLog", "InventoryItem", "Prop", "Quest", "User", "UserQuest"]
+__all__ = ["EventLog", "InventoryItem", "Prop", "Quest", "User", "UserQuest", "RecommendationImpression"]
