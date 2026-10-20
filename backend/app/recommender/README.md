@@ -129,3 +129,109 @@ Remaining work: frontend wiring, real outcome collection/model activation, and
 binding supplied user IDs to authenticated identity. Current ID checks validate
 ownership relative to the supplied ID; they do not authenticate callers.
 Automatic retraining and tuning are deferred.
+
+## Try the pipeline with simulated users
+
+The simulator gives us some history to work with before we have enough real
+users. It creates student, outdoor and balanced personas, then records the quests
+they see and whether they complete them. Everything goes into a separate SQLite
+database, so you can try the training pipeline without starting PostgreSQL or
+the API.
+
+### 1. Set up the environment
+
+Start in the repository root, then stay in `backend/` for the rest of these steps.
+If you already have `.venv`, keep it and install any missing dependencies.
+
+```bash
+cd backend
+if [ ! -d .venv ]; then python3 -m venv .venv; fi
+.venv/bin/python -m pip install -e '.[test,ml]'
+```
+
+On macOS, XGBoost also needs OpenMP:
+
+```bash
+brew install libomp
+```
+
+If Homebrew isn't available or the download fails, the macOS scikit-learn wheel
+may already include `libomp.dylib`. You can use that copy for this terminal session:
+
+```bash
+sim_omp_dir=$(.venv/bin/python -c \
+  'from importlib.util import find_spec; from pathlib import Path; print(Path(find_spec("sklearn").origin).parent / ".dylibs")')
+export DYLD_LIBRARY_PATH="$sim_omp_dir${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}"
+```
+
+### 2. Generate the history
+
+Keep the following commands in the same terminal so `sim_run_dir` stays available.
+Each run gets a fresh temporary directory; the simulator won't overwrite an
+existing database.
+
+```bash
+sim_run_dir=$(mktemp -d /tmp/lifescape-demo.XXXXXX)
+
+.venv/bin/python -m app.recommender.simulator \
+  --output "$sim_run_dir/history.db" \
+  --start-date 2026-09-01 \
+  --days 30 \
+  --users-per-persona 10 \
+  --seed 42
+```
+
+This example creates 30 users and schedules 900 daily visits. With seed 42 and
+the built-in catalog, the summary shows 900 impressions, 542 completions and
+358 skips, plus a breakdown by persona. The command also prints a training
+command. The same seed and settings reproduce the same history in a fresh database.
+
+### 3. Train and inspect the model
+
+Use the existing trainer with the generated database. These dates match the
+30-day example above and leave enough time for the last 24-hour labels to mature.
+
+```bash
+DATABASE_URL="sqlite:///$sim_run_dir/history.db" \
+.venv/bin/python -m app.recommender.train \
+  --validation-start 2026-09-22T00:00:00 \
+  --as-of 2026-10-02T00:00:00 \
+  --output "$sim_run_dir/model"
+
+echo "$sim_run_dir"
+.venv/bin/python -m json.tool "$sim_run_dir/model/metadata.json"
+```
+
+The output folder contains `model.json` and `metadata.json`. Look under `metrics`
+for the training and validation row counts, validation log loss, the constant-rate
+baseline, and average precision. Log loss is better when it's lower. This example
+uses 600 training rows and 270 validation rows; 30 rows are left out because their
+24-hour label windows cross the split. This saves an offline model without
+activating it in the API. Temporary files may be cleared by the operating system;
+copy the run folder elsewhere if you want to keep it.
+
+### 4. Run the tests
+
+```bash
+.venv/bin/python -m pytest tests/recommender/test_simulator.py -q
+.venv/bin/python -m pytest tests -q
+```
+
+The simulator tests check repeatability, persona preferences, task availability,
+assignment links, historical features, training compatibility, and output-file
+protection.
+
+### What this run represents
+
+Quests are sampled uniformly from the available catalog, following the API's
+availability windows and 24-hour completion cooldown. Visits with no available
+quest are counted separately. Users either complete a quest within eight hours
+or skip it; completion chances depend on category preferences and the hour.
+These probabilities are simulation assumptions, not model predictions.
+
+Displays and completions run in timestamp order, so feature snapshots only use
+history available at the time. Persona names and simulated probabilities stay in
+the decision context and aren't training features. Skipped displays have no
+assignment and become negative examples after 24 hours. All timestamps are UTC.
+This helps us check the pipeline; real-user recommendation quality still needs
+to be evaluated with real interactions.
