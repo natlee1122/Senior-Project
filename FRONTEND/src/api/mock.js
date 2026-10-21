@@ -112,7 +112,7 @@ function ensureDemoAccount() {
   const users = readUsers()
   const email = 'demo@lifescape.app'
   if (!users[email]) {
-    const user = emptyUser(email, 'Amanda', 'Hsu')
+    const user = emptyUser(email, 'Adventurer')
     user.password = 'lifescape'
     user.onboardingComplete = true
     user.interests = ['Exercise', 'Study', 'Explore']

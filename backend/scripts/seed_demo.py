@@ -43,7 +43,7 @@ def seed_demo() -> None:
         # Give the demo user login credentials and the profile the mock UI uses.
         user.email = DEMO_EMAIL
         user.password_hash = hash_password(DEMO_PASSWORD)
-        user.first_name, user.last_name = "Amanda", "Hsu"
+        user.first_name, user.last_name = "Adventurer", ""
         user.goal = "Build a consistent daily routine"
         user.interests = ["Exercise", "Study", "Explore"]
         db.flush()

@@ -11,6 +11,9 @@ export default defineConfig({
     include: ['vue', 'vue-router', 'vuetify'],
   },
   server: {
+    proxy: {
+       '/api': 'http://localhost:8000',
+     },
     warmup: {
       clientFiles: ['./src/main.js', './src/App.vue', './src/views/*.vue', './src/components/*.vue'],
     },
