@@ -6,6 +6,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     database_url: str = "postgresql+psycopg://lifescape:lifescape@localhost:5432/lifescape"
     cors_origins: str = "http://localhost:5173"
+    # Override SECRET_KEY in .env for any shared/deployed environment.
+    secret_key: str = "dev-only-insecure-secret-change-me-in-env"
+    access_token_minutes: int = 60 * 24 * 7
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

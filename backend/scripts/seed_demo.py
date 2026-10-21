@@ -3,11 +3,14 @@ from __future__ import annotations
 
 from sqlalchemy import select
 
+from app.core.security import hash_password
 from app.db import SessionLocal
 from app.models.quest import Quest
 from app.models.user import User
 
 DEMO_USERNAME = "demo_user"
+DEMO_EMAIL = "demo@lifescape.app"  # must match app/api/auth.py
+DEMO_PASSWORD = "lifescape"
 
 DEMO_QUESTS = (
     {
@@ -37,7 +40,13 @@ def seed_demo() -> None:
         if user is None:
             user = User(username=DEMO_USERNAME, points=0)
             db.add(user)
-            db.flush()
+        # Give the demo user login credentials and the profile the mock UI uses.
+        user.email = DEMO_EMAIL
+        user.password_hash = hash_password(DEMO_PASSWORD)
+        user.first_name, user.last_name = "Amanda", "Hsu"
+        user.goal = "Build a consistent daily routine"
+        user.interests = ["Exercise", "Study", "Explore"]
+        db.flush()
 
         for quest_data in DEMO_QUESTS:
             quest = db.scalar(select(Quest).where(Quest.title == quest_data["title"]))
@@ -47,7 +56,7 @@ def seed_demo() -> None:
                 for field, value in quest_data.items():
                     setattr(quest, field, value)
 
-    print(f"Seeded demo user: {DEMO_USERNAME}")
+    print(f"Seeded demo user: {DEMO_USERNAME} ({DEMO_EMAIL} / {DEMO_PASSWORD})")
     print(f"Seeded {len(DEMO_QUESTS)} demo quests.")
 
 
