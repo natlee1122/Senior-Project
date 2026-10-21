@@ -14,8 +14,15 @@ erDiagram
     USER {
         int id PK
         varchar username UK
+        varchar email UK "nullable for legacy rows"
+        varchar password_hash "PBKDF2-SHA256"
+        varchar first_name
+        varchar last_name
+        varchar goal
+        json interests
         int points
         timestamp created_at
+        timestamp last_login_at
     }
     QUEST {
         int id PK
