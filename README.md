@@ -1,9 +1,9 @@
 # Group Member
-Natalie Lee
-Amanda Hsu
-Willis Erdman
-Thao Nguyen
-Alfred Chen
+Natalie Lee,
+Amanda Hsu,
+Willis Erdman,
+Thao Nguyen,
+Alfred Chen,
 Yucheng Jing
 
 # Lifescape
