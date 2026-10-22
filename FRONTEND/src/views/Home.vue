@@ -125,19 +125,20 @@ const stats = ref({
 })
 
 async function load() {
-  try {
-    const [questList, me, statData, todayDone] = await Promise.all([
-      api.quests.list(),
-      api.users.me(),
-      api.users.stats(),
-      api.quests.todayCompletions(),
-    ])
-    quests.value = questList
-    user.value = me
-    stats.value = statData
-    completions.value = todayDone
-  } catch (err) {
-    console.error('Failed to load home data:', err)
+  // Load each piece on its own so one missing endpoint (e.g. quests in real
+  // mode, before the backend has them) doesn't blank out the whole page.
+  const [questList, me, statData, todayDone] = await Promise.allSettled([
+    api.quests.list(),
+    api.users.me(),
+    api.users.stats(),
+    api.quests.todayCompletions?.() ?? Promise.resolve({}),
+  ])
+  if (questList.status === 'fulfilled') quests.value = questList.value
+  if (me.status === 'fulfilled') user.value = me.value
+  if (statData.status === 'fulfilled') stats.value = { ...stats.value, ...statData.value }
+  if (todayDone.status === 'fulfilled') completions.value = todayDone.value
+  for (const r of [questList, me, statData, todayDone]) {
+    if (r.status === 'rejected') console.error('Home data failed:', r.reason)
   }
 }
 
