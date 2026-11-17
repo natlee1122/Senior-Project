@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-from datetime import datetime
-
 from sqlalchemy.orm import Session
 
+from app.core.time import utc_now
 from app.models.event import EventLog
 
 
@@ -25,7 +24,7 @@ def log_event(
         model_version=model_version,
         context=context,
         evidence_url=evidence_url,
-        occurred_at=datetime.utcnow(),
+        occurred_at=utc_now(),
     )
     db.add(event)
     db.commit()

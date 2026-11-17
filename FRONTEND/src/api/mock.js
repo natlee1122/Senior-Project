@@ -59,6 +59,8 @@ function writeUsers(users) {
 function emptyUser(email, firstName = '', lastName = '') {
   const fallback = email.split('@')[0]
   return {
+    id: email,
+    username: fallback,
     email,
     firstName: firstName || fallback,
     lastName,
@@ -68,6 +70,7 @@ function emptyUser(email, firstName = '', lastName = '') {
     interests: [],
     goal: '',
     xp: 0,
+    points: 0,
     coins: 0,
     completed: {},
     photos: {},
@@ -141,7 +144,7 @@ export const auth = {
     writeUsers(users)
 
     localStorage.setItem(TOKEN_KEY, user.email) // log in right after signing up
-    return user
+    return { token: user.email, tokenType: 'bearer', user }
   },
 
   async login({ email, password }) {
@@ -152,14 +155,14 @@ export const auth = {
     if (user.password !== password) throw new Error('Incorrect password.')
 
     localStorage.setItem(TOKEN_KEY, user.email) // fake "token"
-    return { token: user.email }
+    return { token: user.email, tokenType: 'bearer', user }
   },
 
   async demoLogin() {
     await delay()
     const user = ensureDemoAccount()
     localStorage.setItem(TOKEN_KEY, user.email)
-    return { token: user.email }
+    return { token: user.email, tokenType: 'bearer', user }
   },
 
   async logout() {
@@ -195,6 +198,21 @@ export const users = {
       completedThisWeek,
     }
   },
+
+  async update(data) {
+    await delay()
+    const user = requireUser()
+    Object.assign(user, {
+      ...data,
+      firstName: data.firstName ?? user.firstName,
+      lastName: data.lastName ?? user.lastName,
+      goal: data.goal ?? user.goal,
+      interests: data.interests ?? user.interests,
+    })
+    user.name = `${user.firstName} ${user.lastName}`.trim() || user.username
+    saveUser(user)
+    return user
+  },
 }
 
 export const quests = {
@@ -222,6 +240,7 @@ export const quests = {
       coins: reward.coins,
       theme: CATEGORY_THEMES[category] || 'forest',
       custom: true,
+      photoOptional: false,
     }
     user.customQuests ||= []
     user.customQuests.push(quest)
@@ -322,6 +341,7 @@ export const quests = {
       photoAttached: Boolean(photoData),
     }
     user.xp += quest.xp
+    user.points = user.xp
     user.coins += quest.coins
 
     if (photoData) {

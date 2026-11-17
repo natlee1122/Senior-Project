@@ -21,8 +21,9 @@ export const users = {
 
 export const quests = {
   list: () => request('/quests'),
-  create: (data) => request('/quests', { method: 'POST', body: data }),   // doesn't exist yet
-  update: (id, data) => request(`/quests/${id}`, { method: 'PATCH', body: data }),   // doesn't exist yet
-  remove: (id) => request(`/quests/${id}`, { method: 'DELETE' }),        // doesn't exist yet
-  complete: (id) => request(`/quests/${id}/complete`, { method: 'POST' }),  // doesn't exist yet
+  create: (data) => request('/quests', { method: 'POST', body: data }),
+  update: (id, data) => request(`/quests/${id}`, { method: 'PATCH', body: data }),
+  remove: (id) => request(`/quests/${id}`, { method: 'DELETE' }),
+  todayCompletions: () => request('/quests/today-completions'),
+  complete: (id) => request(`/quests/${id}/complete`, { method: 'POST' }),
 }

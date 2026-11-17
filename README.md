@@ -17,7 +17,7 @@ Built as a CSDS 395 senior project.
 | Area | State |
 | --- | --- |
 | Accounts (sign up, login, demo login, profile, stats) | Done on the backend and connected to the frontend |
-| Quests (list, add, edit, delete, complete) | Working in the frontend on mock data. The backend endpoints are not finished, so the frontend is not connected to them yet |
+| Quests (list, add, edit, delete, complete) | Done on the backend and connected to the frontend |
 | Recommendations | Backend pipeline with a trained XGBoost model, plus a simulator for testing. Not connected to the frontend yet |
 | World and Inventory pages | Placeholders with sample data |
 
@@ -35,7 +35,7 @@ The frontend can run in two modes (see [Mock mode and real mode](#mock-mode-and-
 ```text
 Senior-Project/
 |-- FRONTEND/            Vue app (views, components, API layer)
-|   |-- src/api/         index.js picks mock.js or real.js; client.js is the fetch wrapper
+|   |-- src/api/         real.js contains the backend API client; client.js is the fetch wrapper
 |   |-- src/views/       Login, Signup, Home, Quests, World, Inventory, Profile
 |   `-- src/components/  Quest dialogs, quest scene, page heading
 |-- backend/             FastAPI service
@@ -110,19 +110,20 @@ This opens the backend and frontend in two windows, applies migrations, and open
 
 ## Mock mode and real mode
 
-The frontend talks to its data through one small API layer in `FRONTEND/src/api/`. A single setting chooses the data source, in `FRONTEND/.env.development`:
+The frontend supports both API implementations through `FRONTEND/src/api/`. Select the mode in `FRONTEND/.env.development`:
 
 ```text
-VITE_USE_MOCK=true    # data is stored in the browser, no backend needed
 VITE_USE_MOCK=false   # pages call the FastAPI backend
+# VITE_USE_MOCK=true  # pages use browser-local demo data
 ```
 
-Vite only reads this file when it starts, so restart `npm run dev` after changing it.
+Restart `npm run dev` after changing the setting.
 
 - **Mock mode** is a complete demo of the app without a server. Accounts and quests live in the browser's `localStorage`.
-- **Real mode** uses the backend for sign up, login, demo login, profile and stats. The quest screens are not connected yet, so Home shows no quests and Quests does not work in this mode.
+- **Real mode** uses the backend for sign up, login, demo login, profile, stats, and the complete quest lifecycle.
+- Mock mode is selected explicitly; the app does not silently switch modes when the backend fails.
 
-Switching modes does not carry accounts across, because mock accounts are in the browser and real accounts are in PostgreSQL. If login behaves oddly after a switch, clear the browser's stored data with `localStorage.clear()` in the DevTools console and refresh.
+Switching modes does not carry accounts across: mock accounts are in the browser and real accounts are in PostgreSQL. The app displays a `Demo mode` indicator when mock mode is active.
 
 ## Demo account
 

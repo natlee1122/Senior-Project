@@ -30,6 +30,11 @@ erDiagram
         varchar category
         varchar description
         int points
+        int coins
+        varchar duration
+        varchar difficulty
+        varchar theme
+        boolean photo_optional
         varchar location
         timestamp time_start
         timestamp time_end

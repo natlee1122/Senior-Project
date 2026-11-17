@@ -7,6 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.core.security import create_access_token, hash_password, verify_password
+from app.core.time import utc_now
 from app.db import get_db
 from app.main import app
 from app.models import Quest, User, UserQuest
@@ -123,7 +124,7 @@ def test_stats_counts_completed_quests(client, session_factory):
         quest = Quest(title="Walk", category="Exercise", points=50)
         db.add(quest)
         db.flush()
-        now = datetime.utcnow()
+        now = utc_now()
         db.add_all([
             UserQuest(user_id=user.id, quest_id=quest.id, status="COMPLETED", ended_at=now),
             UserQuest(user_id=user.id, quest_id=quest.id, status="COMPLETED", ended_at=now - timedelta(days=3)),

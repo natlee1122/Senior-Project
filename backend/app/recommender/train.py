@@ -10,6 +10,7 @@ from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.time import utc_now
 from app.models.assignment import UserQuest
 from app.recommender.features import FEATURE_VERSION, NUMERIC_FEATURES, encode
 from app.recommender.model_io import (
@@ -204,7 +205,7 @@ def fit_bundle(
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train the catalog quest recommender")
     parser.add_argument("--validation-start", type=datetime.fromisoformat, required=True)
-    parser.add_argument("--as-of", type=datetime.fromisoformat, default=datetime.utcnow())
+    parser.add_argument("--as-of", type=datetime.fromisoformat, default=utc_now())
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
