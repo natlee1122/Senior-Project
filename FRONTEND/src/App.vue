@@ -38,6 +38,9 @@
       <v-app-bar flat border="b" height="72" color="rgba(255,255,255,.86)" class="topbar px-md-10 px-4">
         <v-spacer />
         <div class="d-flex align-center ga-4">
+          <v-chip v-if="isMockMode" size="small" color="warning" variant="tonal" class="font-weight-bold">
+            Demo mode
+          </v-chip>
           <v-btn icon variant="text" size="32" color="muted" aria-label="Search" @click="showNotice('Search is coming soon.')">
             <span class="text-h6">⌕</span>
           </v-btn>
@@ -72,6 +75,7 @@ const router = useRouter()
 const { xs, smAndDown } = useDisplay()
 
 const isLoginPage = computed(() => ['/login', '/signup'].includes(route.path))
+const isMockMode = import.meta.env.VITE_USE_MOCK === 'true'
 const user = ref(null)
 const initial = computed(() => (user.value ? getInitial(user.value) : ''))
 

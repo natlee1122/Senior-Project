@@ -79,7 +79,7 @@ After applying migrations, seed one demo user and the three quests used by the V
 .venv/bin/python scripts/seed_demo.py
 ```
 
-The script is safe to rerun. It creates `demo_user`, creates or updates the three quests by title, and maps the frontend XP values to the database `points` field. Duration, difficulty, coins, and theme remain frontend presentation metadata because they are not columns in the current ERD.
+The script is safe to rerun. It creates `demo_user`, creates or updates the three quests by title, and seeds the frontend quest metadata (`xp`, `coins`, `duration`, `difficulty`, `theme`, and optional photo support).
 
 ## Tests
 

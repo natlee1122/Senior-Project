@@ -6,6 +6,7 @@ from typing import Optional
 from sqlalchemy import JSON, DateTime, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.time import utc_now
 from app.models.base import Base
 
 
@@ -23,7 +24,7 @@ class User(Base):
     goal: Mapped[str] = mapped_column(String(120), nullable=False, default="", server_default="")
     interests: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
     points: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
-    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now)
     last_login_at: Mapped[Optional[datetime]] = mapped_column(DateTime)
 
     assignments: Mapped[list["UserQuest"]] = relationship(back_populates="user")

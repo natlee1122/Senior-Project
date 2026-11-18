@@ -1,9 +1,8 @@
-from datetime import datetime
-
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 
 from app.db import get_db
+from app.core.time import utc_now
 from app.recommender.schemas import AssignmentLink, DisplayConfirmation
 from app.recommender.service import confirm_shown, link_assignment
 
@@ -13,7 +12,7 @@ router = APIRouter(prefix="/impressions")
 @router.post("/{impression_id}/shown", status_code=204, response_class=Response)
 def shown(impression_id: int, payload: DisplayConfirmation, db: Session = Depends(get_db)):
     try:
-        confirm_shown(db, impression_id, payload.user_id, now=datetime.utcnow())
+        confirm_shown(db, impression_id, payload.user_id, now=utc_now())
     except LookupError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 

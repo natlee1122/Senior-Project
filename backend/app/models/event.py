@@ -6,6 +6,7 @@ from typing import Optional
 from sqlalchemy import DateTime, ForeignKey, Integer, JSON, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from app.core.time import utc_now
 from app.models.base import Base
 
 
@@ -17,7 +18,7 @@ class EventLog(Base):
     recommender: Mapped[Optional[str]] = mapped_column(String(30))
     status: Mapped[str] = mapped_column(String(30), nullable=False)
     event_type: Mapped[str] = mapped_column(String(30), nullable=False)
-    occurred_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    occurred_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now)
     context: Mapped[Optional[dict]] = mapped_column(JSON)
     model_version: Mapped[Optional[str]] = mapped_column(String(50))
     evidence_url: Mapped[Optional[str]] = mapped_column(String(500))

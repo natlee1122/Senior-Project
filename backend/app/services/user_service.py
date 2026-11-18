@@ -7,6 +7,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.security import hash_password, verify_password
+from app.core.time import utc_now
 from app.models.assignment import UserQuest
 from app.models.user import User
 from app.schemas.user import UserCreate, UserStats, UserUpdate
@@ -47,7 +48,7 @@ def create_user(db: Session, payload: UserCreate) -> User:
         last_name=payload.last_name,
         goal=payload.goal,
         interests=payload.interests,
-        last_login_at=datetime.utcnow(),
+        last_login_at=utc_now(),
     )
     db.add(user)
     db.commit()
@@ -59,7 +60,7 @@ def authenticate(db: Session, email: str, password: str) -> Optional[User]:
     user = get_user_by_email(db, email)
     if user is None or not verify_password(password, user.password_hash):
         return None
-    user.last_login_at = datetime.utcnow()
+    user.last_login_at = utc_now()
     db.commit()
     db.refresh(user)
     return user
@@ -76,7 +77,7 @@ def update_profile(db: Session, user: User, payload: UserUpdate) -> User:
 
 
 def get_stats(db: Session, user: User, now: Optional[datetime] = None) -> UserStats:
-    now = now or datetime.utcnow()
+    now = now or utc_now()
     today = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
     def completed_since(start: datetime) -> int:
