@@ -15,6 +15,15 @@ Set-Location -LiteralPath '$root\FRONTEND'
 npm run dev
 "@
 
-# Give them a few seconds, then open the site
-Start-Sleep -Seconds 6
+function Wait-Url($url, $seconds) {
+  $deadline = (Get-Date).AddSeconds($seconds)
+  while ((Get-Date) -lt $deadline) {
+    try { Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 2 | Out-Null; return }
+    catch { Start-Sleep -Seconds 1 }
+  }
+}
+
+Write-Host "Waiting for the servers..."
+Wait-Url 'http://localhost:5173' 30
+Wait-Url 'http://127.0.0.1:8000/health' 10
 Start-Process 'http://localhost:5173'
