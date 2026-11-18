@@ -22,81 +22,7 @@
               <div class="avatar-preview-wrap">
                 <div class="avatar-stage" aria-label="Avatar preview">
                   <div class="avatar-scene">
-                    <svg class="avatar-art" viewBox="0 0 240 330" role="img" :aria-label="`${characterOptions.find(o => o.value === characterStyle)?.label || 'Character'} avatar${equipped.hat ? ', wearing a cap' : ''}${equipped.headphones ? ' with headphones' : ''}${equipped.clothing ? ', wearing a hoodie' : ''}${equipped.shoes ? ', wearing sneakers' : ''}${equipped.backpack ? ' with a backpack' : ''}`">
-                      <defs>
-                        <linearGradient id="skin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f5c6a8"/><stop offset="1" stop-color="#d99578"/></linearGradient>
-                        <linearGradient id="shirt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8c78d1"/><stop offset="1" stop-color="#6652a9"/></linearGradient>
-                        <linearGradient id="cap" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7da7ff"/><stop offset="1" stop-color="#4268d9"/></linearGradient>
-                        <linearGradient id="bag" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff8aab"/><stop offset="1" stop-color="#d93673"/></linearGradient>
-                      </defs>
-                      <!-- backpack sits behind the shoulders -->
-                      <g v-if="equipped.backpack" class="wearable backpack-wearable">
-                        <path d="M78 112 Q64 120 68 151 L74 186 Q78 197 91 190 L98 132 Z" fill="#bd3e79" stroke="#a72d66" stroke-width="2"/>
-                        <path d="M76 137 Q82 126 91 137 L92 178 Q82 185 78 175 Z" fill="url(#bag)"/>
-                        <path d="M80 143 L87 143" stroke="#ffd66f" stroke-width="3" stroke-linecap="round"/>
-                      </g>
-                      <!-- hair and head -->
-                      <g v-if="characterStyle !== 'masculine'" fill="#49352f">
-                        <path d="M86 55 Q87 29 120 29 Q153 29 154 58 L151 91 Q145 104 136 100 L104 100 Q91 98 87 86 Z"/>
-                      </g>
-                      <g v-else fill="#49352f"><path d="M88 58 Q89 29 120 29 Q151 29 152 57 L145 70 L95 70 Z"/></g>
-                      <path d="M105 89 L105 108 Q120 120 135 108 L135 88 Z" fill="url(#skin)"/>
-                      <ellipse cx="120" cy="68" rx="29" ry="34" fill="url(#skin)"/>
-                      <!-- ears -->
-                      <ellipse cx="91" cy="70" rx="5" ry="8" fill="#e5a58a"/><ellipse cx="149" cy="70" rx="5" ry="8" fill="#e5a58a"/>
-                      <!-- fringe -->
-                      <path v-if="characterStyle !== 'masculine'" d="M92 58 Q93 35 119 36 Q143 35 148 55 Q133 48 123 51 Q108 62 92 58Z" fill="#49352f"/>
-                      <path v-else d="M92 53 Q98 33 121 35 Q141 34 147 51 L132 47 L119 51 L105 47 Z" fill="#49352f"/>
-                      <!-- face -->
-                      <ellipse cx="109" cy="69" rx="3.3" ry="4.2" fill="#382b2b"/><ellipse cx="131" cy="69" rx="3.3" ry="4.2" fill="#382b2b"/>
-                      <circle cx="110" cy="68" r="1" fill="#fff"/><circle cx="132" cy="68" r="1" fill="#fff"/>
-                      <path d="M114 84 Q120 88 126 84" fill="none" stroke="#a64e58" stroke-width="2.5" stroke-linecap="round"/>
-                      <path d="M116 77 Q120 80 124 77" fill="none" stroke="#cf8e74" stroke-width="1.5" stroke-linecap="round"/>
-                      <!-- headphones wrap around the head, behind the cap -->
-                      <g v-if="equipped.headphones" class="wearable">
-                        <path d="M86 70 A34 35 0 0 1 154 70" fill="none" stroke="#77788d" stroke-width="7" stroke-linecap="round"/>
-                        <path d="M86 69 A34 35 0 0 1 154 69" fill="none" stroke="#d9d8e5" stroke-width="3" stroke-linecap="round"/>
-                        <rect x="80" y="66" width="13" height="25" rx="5" fill="#8c8ba0"/><rect x="147" y="66" width="13" height="25" rx="5" fill="#8c8ba0"/>
-                        <rect x="83" y="70" width="7" height="17" rx="3" fill="#c8c7d4"/><rect x="150" y="70" width="7" height="17" rx="3" fill="#c8c7d4"/>
-                      </g>
-                      <!-- arms -->
-                      <path d="M91 122 Q81 126 78 143 L73 178 Q72 187 79 188 Q84 187 85 179 L91 151Z" fill="url(#skin)"/>
-                      <path d="M149 122 Q159 126 162 143 L167 178 Q168 187 161 188 Q156 187 155 179 L149 151Z" fill="url(#skin)"/>
-                      <!-- legs -->
-                      <path d="M99 190 L119 190 L116 268 L99 268Z" fill="#77728a"/>
-                      <path d="M121 190 L141 190 L143 268 L126 268Z" fill="#77728a"/>
-                      <!-- default top, replaced visually by hoodie when equipped -->
-                      <path v-if="!equipped.clothing" d="M99 111 Q120 120 141 111 L153 125 L146 194 L94 194 L87 125Z" fill="url(#shirt)"/>
-                      <g v-else class="wearable hoodie-wearable">
-                        <path d="M99 111 Q120 120 141 111 L153 125 L146 194 L94 194 L87 125Z" fill="#d8b27a" stroke="#b88c55" stroke-width="1.5"/>
-                        <path d="M105 114 L120 137 L135 114 L141 120 L128 143 L128 194 L112 194 L112 143 L99 120Z" fill="#f0d3a0"/>
-                        <path d="M112 143 L128 143" stroke="#b88c55" stroke-width="2"/>
-                        <circle cx="124" cy="153" r="1.7" fill="#a77a49"/><circle cx="124" cy="165" r="1.7" fill="#a77a49"/><circle cx="124" cy="177" r="1.7" fill="#a77a49"/>
-                      </g>
-                      <!-- cap sits naturally on top of the hair -->
-                      <g v-if="equipped.hat" class="wearable cap-wearable">
-                        <path d="M88 54 Q87 23 119 22 Q151 22 153 54 L153 62 L88 62Z" fill="url(#cap)"/>
-                        <path d="M89 53 Q113 48 136 57 Q145 61 154 63 L151 69 Q122 64 101 70 Q87 72 77 66 Q72 62 78 59Z" fill="#4964c7"/>
-                        <path d="M120 25 L120 52" stroke="#a9c2ff" stroke-width="2" opacity=".8"/>
-                      </g>
-                      <!-- shoes are aligned to the feet -->
-                      <g v-if="equipped.shoes" class="wearable shoes-wearable">
-                        <path d="M96 263 L113 263 L119 278 Q124 283 115 287 L91 287 Q86 285 91 278Z" fill="#8f70d8" stroke="#6c51b5" stroke-width="1.5"/>
-                        <path d="M126 263 L143 263 L149 278 Q154 283 145 287 L121 287 Q116 285 121 278Z" fill="#8f70d8" stroke="#6c51b5" stroke-width="1.5"/>
-                        <path d="M91 282 L117 282 M121 282 L147 282" stroke="#f7f0ff" stroke-width="3" stroke-linecap="round"/>
-                        <path d="M102 269 L110 276 M132 269 L140 276" stroke="#e6dcff" stroke-width="2" stroke-linecap="round"/>
-                      </g>
-                      <g v-else fill="#51446e"><path d="M99 263 L113 263 L117 276 L103 279 L93 278 Q91 273 99 263Z"/><path d="M128 263 L142 263 L149 276 L138 279 L127 278Z"/></g>
-                      <!-- fox companion stands beside the avatar, not on top of the body -->
-                      <g v-if="equipped.pet" class="wearable pet-wearable" transform="translate(165 221)">
-                        <path d="M7 16 L3 0 L16 8 L28 0 L27 17" fill="#d97935" stroke="#a95728" stroke-width="1.5" stroke-linejoin="round"/>
-                        <ellipse cx="17" cy="24" rx="17" ry="19" fill="#e9853d"/>
-                        <path d="M5 25 Q17 15 29 25 L25 37 L17 42 L8 36Z" fill="#fff0d9"/>
-                        <circle cx="11" cy="22" r="2" fill="#3e3029"/><circle cx="23" cy="22" r="2" fill="#3e3029"/>
-                        <path d="M15 28 L19 28 L17 31Z" fill="#4b3029"/>
-                        <path d="M29 34 Q42 30 37 43 Q33 48 27 42" fill="none" stroke="#d97935" stroke-width="7" stroke-linecap="round"/>
-                      </g>
-                    </svg>
+                    <AvatarFigure :body-type="characterStyle" :equipped="equipped" />
                   </div>
                 </div>
                 <div class="text-center mt-3">
@@ -108,15 +34,9 @@
 
             <v-col cols="12" md="6" class="pt-6 pt-md-0">
               <div class="text-subtitle-1 font-weight-bold mb-2">Character style</div>
-              <div class="d-flex flex-wrap ga-2 mb-6" role="group" aria-label="Choose character style">
-                <v-btn
-                  v-for="option in characterOptions"
-                  :key="option.value"
-                  :variant="characterStyle === option.value ? 'flat' : 'outlined'"
-                  :color="characterStyle === option.value ? 'primary' : 'default'"
-                  @click="setCharacterStyle(option.value)"
-                >{{ option.label }}</v-btn>
-              </div>
+              <v-btn-toggle v-model="characterStyle" class="mb-6" color="primary" variant="outlined" divided mandatory aria-label="Choose character style">
+                <v-btn v-for="option in characterOptions" :key="option.value" :value="option.value">{{ option.label }}</v-btn>
+              </v-btn-toggle>
 
               <div class="d-flex align-center justify-space-between mb-3">
                 <div>
@@ -237,6 +157,8 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import api from '../api'
 import { getInitial } from '../utils/user'
+import AvatarFigure from '../components/avatar/AvatarFigure.vue'
+import { DEFAULT_BODY_TYPE, readAppearance, writeAppearance } from '../components/avatar/avatarStorage'
 
 const user = ref(null)
 const stats = ref({ level: 1, xp: 0, coins: 0, xpIntoLevel: 0, levelProgress: 0, completedThisWeek: 0 })
@@ -245,7 +167,7 @@ const snackbar = ref(false)
 const message = ref('')
 const activeTab = ref('Avatar')
 const tabs = ['Avatar', 'Home', 'Pets', 'Stats']
-const characterStyle = ref('feminine')
+const characterStyle = ref(DEFAULT_BODY_TYPE)
 const characterOptions = [
   { label: 'Feminine', value: 'feminine' },
   { label: 'Masculine', value: 'masculine' },
@@ -260,7 +182,6 @@ const accessories = [
   { id: 'backpack', label: 'Backpack', icon: '🎒', slot: 'backpack' },
 ]
 const equipped = ref({ hat: null, clothing: null, headphones: null, pet: null, shoes: null, backpack: null })
-const storageKey = computed(() => `lifescape-avatar-${user.value?.email || user.value?.id || 'guest'}`)
 
 onMounted(async () => {
   try {
@@ -273,36 +194,24 @@ onMounted(async () => {
   }
 })
 
-watch([characterStyle, equipped, storageKey], () => {
+watch([characterStyle, equipped], () => {
   if (!user.value) return
-  try {
-    localStorage.setItem(storageKey.value, JSON.stringify({ characterStyle: characterStyle.value, equipped: equipped.value }))
-  } catch {
-    // Appearance still works for the current page if browser storage is unavailable.
-  }
+  writeAppearance(user.value, { characterStyle: characterStyle.value, equipped: equipped.value })
 }, { deep: true })
 
 function restoreAppearance() {
-  try {
-    const saved = JSON.parse(localStorage.getItem(storageKey.value) || 'null')
-    if (!saved) return
-    if (characterOptions.some((option) => option.value === saved.characterStyle)) characterStyle.value = saved.characterStyle
-    for (const slot of Object.keys(equipped.value)) {
-      const savedItem = saved.equipped?.[slot]
-      equipped.value[slot] = accessories.find((item) => item.id === savedItem?.id) || null
-    }
-  } catch {
-    // Ignore invalid saved appearance and use the default avatar.
+  const saved = readAppearance(user.value)
+  if (!saved) return
+  if (characterOptions.some((option) => option.value === saved.characterStyle)) characterStyle.value = saved.characterStyle
+  for (const slot of Object.keys(equipped.value)) {
+    const savedItem = saved.equipped?.[slot]
+    equipped.value[slot] = accessories.find((item) => item.id === savedItem?.id) || null
   }
 }
 
 function notify(text) {
   message.value = text
   snackbar.value = true
-}
-
-function setCharacterStyle(style) {
-  characterStyle.value = style
 }
 
 function toggleAccessory(item) {
@@ -327,9 +236,6 @@ function clearEquipment() {
 .avatar-preview-wrap { width: 100%; display: flex; flex-direction: column; align-items: center; }
 .avatar-stage { width: min(100%, 390px); height: 430px; position: relative; display: flex; align-items: center; justify-content: center; border-radius: 24px; background: radial-gradient(ellipse at 50% 75%, #e7f0e9 0%, #f7faf7 58%, #fbfcfb 100%); overflow: hidden; }
 .avatar-scene { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-.avatar-art { width: min(100%, 300px); height: 100%; overflow: visible; filter: drop-shadow(0 7px 8px rgb(34 49 42 / 9%)); }
-.wearable { filter: drop-shadow(0 2px 2px rgb(34 31 48 / 16%)); }
-.cap-wearable, .headphones-wearable, .hoodie-wearable, .shoes-wearable, .backpack-wearable { transition: opacity 160ms ease; }
 .avatar-preview-wrap { max-width: 100%; }
 
 .accessory-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
@@ -343,7 +249,6 @@ function clearEquipment() {
   .profile-heading h1 { font-size: 1.35rem !important; line-height: 1.3; }
   .profile-heading p { font-size: 0.8rem; }
   .avatar-stage { height: 390px; }
-  .avatar-art { width: min(100%, 280px); }
   .accessory-grid { grid-template-columns: 1fr; }
 }
 </style>
