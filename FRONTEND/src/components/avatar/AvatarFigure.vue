@@ -1,5 +1,5 @@
 <template>
-  <svg class="avatar-figure" :viewBox="VIEW_BOX" role="img" :aria-label="ariaLabel">
+  <svg :class="{ 'avatar-figure': standalone }" :viewBox="VIEW_BOX" overflow="visible" role="img" :aria-label="ariaLabel">
     <defs>
       <linearGradient v-for="g in GRADIENTS" :id="id(g.name)" :key="g.name" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0" :stop-color="g.from" />
@@ -152,6 +152,8 @@ const props = defineProps({
   bodyType: { type: String, default: 'neutral' },
   // Equipped items keyed by slot (hat, clothing, headphones, pet, shoes, backpack)
   equipped: { type: Object, default: () => ({}) },
+  // Set to false when nested inside another <svg>, which then controls the size
+  standalone: { type: Boolean, default: true },
 })
 
 const HAIR = '#49352f'
