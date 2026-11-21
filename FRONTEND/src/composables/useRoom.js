@@ -4,6 +4,7 @@ import {
   clampAvatarPosition, clampPosition, createDefaultRoom, newUid,
 } from '../components/world/furnitureCatalog'
 import { loadRoom, saveRoom } from './roomRepository'
+import { loadWardrobe } from './wardrobeRepository'
 
 const ROTATION_STEP = 15
 const ROTATION_LIMIT = 45
@@ -17,13 +18,14 @@ export function useRoom() {
   const ready = ref(false)
   const saveStatus = ref('saved') // 'saved' | 'saving'
   const earnedCoins = ref(0)
+  const wardrobeSpent = ref(0) // coins spent in the wardrobe shop, which shares this balance
   const selectedKey = ref(null) // an item uid, 'avatar', or null
 
   let owner = null
   let loading = false
   let saveTimer = null
 
-  const coins = computed(() => Math.max(0, earnedCoins.value + STARTER_COINS - state.value.spent))
+  const coins = computed(() => Math.max(0, earnedCoins.value + STARTER_COINS - state.value.spent - wardrobeSpent.value))
   const ownedCount = (id) => state.value.owned[id] ?? 0
   const placedCount = (id) => state.value.items.filter((item) => item.id === id).length
   const availableCount = (id) => ownedCount(id) - placedCount(id)
@@ -39,6 +41,7 @@ export function useRoom() {
     earnedCoins.value = coinsFromServer
     loading = true
     state.value = await loadRoom(user)
+    wardrobeSpent.value = (await loadWardrobe(user)).spent
     selectedKey.value = null
     await nextTick() // let the save watcher see (and ignore) the freshly loaded state
     loading = false
@@ -146,6 +149,7 @@ export function useRoom() {
     removeSelected, setWall, setFloor, setLighting, applyTheme, resetLayout,
     select: (key) => { selectedKey.value = key },
     setEarnedCoins: (value) => { earnedCoins.value = value },
+    setWardrobeSpent: (value) => { wardrobeSpent.value = value },
     availableCount, ownedCount, placedCount,
   }
 }

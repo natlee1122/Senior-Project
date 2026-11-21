@@ -64,6 +64,7 @@ import RoomEditorPanel from '../components/world/RoomEditorPanel.vue'
 import RoomScene from '../components/world/RoomScene.vue'
 import { BODY_PRESETS } from '../components/avatar/avatarBodies'
 import { DEFAULT_BODY_TYPE, readAppearance } from '../components/avatar/avatarStorage'
+import { ITEMS_BY_ID, upgradeEquipped } from '../components/avatar/wardrobeCatalog'
 import { LIGHTING } from '../components/world/furnitureCatalog'
 import { useRoom } from '../composables/useRoom'
 
@@ -84,14 +85,14 @@ const greetingIndex = ref(0)
 let bubbleTimer
 
 const displayName = computed(() => user.value?.name?.trim().split(/\s+/)[0] || 'Adventurer')
-const outfitCount = computed(() => Object.values(equipped.value).filter(Boolean).length)
+const outfitCount = computed(() => Object.keys(equipped.value).filter((slot) => !slot.startsWith('pet')).length)
 
 const details = computed(() => [
   { icon: '★', label: 'Level', value: stats.value.level },
   { icon: '●', label: 'Coins', value: room.coins },
   { icon: '🛋️', label: 'Furniture', value: `${room.state.items.length} pieces in your room` },
-  { icon: '🧥', label: 'Outfit', value: outfitCount.value ? `${outfitCount.value} item${outfitCount.value > 1 ? 's' : ''} equipped` : 'Nothing equipped' },
-  { icon: '🦊', label: 'Companion', value: equipped.value.pet?.label || 'None yet' },
+  { icon: '🧥', label: 'Outfit', value: outfitCount.value ? `${outfitCount.value} item${outfitCount.value > 1 ? 's' : ''} worn` : 'Basic outfit' },
+  { icon: '🦊', label: 'Companion', value: ITEMS_BY_ID[equipped.value.pet?.id]?.name || 'None yet' },
 ])
 
 const greetings = computed(() => [
@@ -125,7 +126,7 @@ onBeforeUnmount(() => {
 function applyAppearance() {
   const saved = readAppearance(user.value)
   bodyType.value = Object.hasOwn(BODY_PRESETS, saved?.characterStyle) ? saved.characterStyle : DEFAULT_BODY_TYPE
-  equipped.value = saved?.equipped ?? {}
+  equipped.value = upgradeEquipped(saved?.equipped)
 }
 
 function startEditing(tab = 'items') {

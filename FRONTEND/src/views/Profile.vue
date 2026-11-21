@@ -22,44 +22,25 @@
               <div class="avatar-preview-wrap">
                 <div class="avatar-stage" aria-label="Avatar preview">
                   <div class="avatar-scene">
-                    <AvatarFigure :body-type="characterStyle" :equipped="equipped" />
+                    <AvatarFigure :body-type="wardrobe.characterStyle" :equipped="wardrobe.equipped" />
                   </div>
                 </div>
                 <div class="text-center mt-3">
                   <div class="text-subtitle-1 font-weight-bold">Your avatar</div>
-                  <div class="text-body-2 text-medium-emphasis">Choose a style and equip items below.</div>
+                  <div class="text-body-2 text-medium-emphasis">Pick a body, then dress it from the wardrobe.</div>
                 </div>
               </div>
             </v-col>
 
             <v-col cols="12" md="6" class="pt-6 pt-md-0">
-              <div class="text-subtitle-1 font-weight-bold mb-2">Character style</div>
-              <v-btn-toggle v-model="characterStyle" class="mb-6" color="primary" variant="outlined" divided mandatory aria-label="Choose character style">
+              <div class="d-flex align-center justify-space-between mb-2">
+                <div class="text-subtitle-1 font-weight-bold">Character style</div>
+                <v-btn variant="text" size="small" @click="wardrobe.resetOutfit()">Reset outfit</v-btn>
+              </div>
+              <v-btn-toggle :model-value="wardrobe.characterStyle" class="mb-6" color="primary" variant="outlined" divided mandatory aria-label="Choose character style" @update:model-value="wardrobe.setBody">
                 <v-btn v-for="option in characterOptions" :key="option.value" :value="option.value">{{ option.label }}</v-btn>
               </v-btn-toggle>
-
-              <div class="d-flex align-center justify-space-between mb-3">
-                <div>
-                  <div class="text-subtitle-1 font-weight-bold">Accessories</div>
-                  <div class="text-body-2 text-medium-emphasis">Select an item to wear it. Select it again to remove it.</div>
-                </div>
-                <v-btn variant="text" size="small" @click="clearEquipment">Clear all</v-btn>
-              </div>
-              <div class="accessory-grid">
-                <v-btn
-                  v-for="item in accessories"
-                  :key="item.id"
-                  class="accessory-option"
-                  :class="{ 'accessory-option--selected': equipped[item.slot]?.id === item.id }"
-                  :variant="equipped[item.slot]?.id === item.id ? 'tonal' : 'outlined'"
-                  :color="equipped[item.slot]?.id === item.id ? 'primary' : 'default'"
-                  @click="toggleAccessory(item)"
-                >
-                  <span class="accessory-icon">{{ item.icon }}</span>
-                  <span class="accessory-label">{{ item.label }}</span>
-                  <v-icon v-if="equipped[item.slot]?.id === item.id" icon="mdi-check-circle" size="small" class="ml-auto" />
-                </v-btn>
-              </div>
+              <WardrobePanel :wardrobe="wardrobe" :slots="avatarSlots" outfits />
             </v-col>
           </v-row>
         </v-window-item>
@@ -89,24 +70,27 @@
         </v-window-item>
 
         <v-window-item value="Pets">
-          <div class="tab-content">
-            <div class="text-h6 mb-1">Your companions</div>
-            <p class="text-body-2 text-medium-emphasis mb-5">Companions you choose here can also appear beside your avatar.</p>
-            <v-card v-if="equipped.pet" rounded="lg" border elevation="0" class="pa-4 d-flex align-center ga-4">
-              <v-avatar color="surface-variant" size="68" class="text-h4">{{ equipped.pet.icon }}</v-avatar>
-              <div class="flex-grow-1">
-                <div class="text-subtitle-1 font-weight-bold">{{ equipped.pet.label }}</div>
-                <div class="text-body-2 text-medium-emphasis">Equipped companion</div>
+          <v-row class="pa-5 pa-md-10 ga-0" align="center">
+            <v-col cols="12" md="5" class="d-flex justify-center">
+              <div class="avatar-preview-wrap">
+                <div class="avatar-stage pet-stage" aria-label="Companion preview">
+                  <PetFigure v-if="wardrobe.equipped.pet" class="pet-preview" :equipped="petEquipped" />
+                  <div v-else class="text-center px-6">
+                    <div class="text-h2 mb-2">🐾</div>
+                    <div class="text-subtitle-1 font-weight-bold">No companion yet</div>
+                    <p class="text-body-2 text-medium-emphasis mt-1">Pick one from the list. It will also appear beside your avatar.</p>
+                  </div>
+                </div>
+                <div v-if="wardrobe.equipped.pet" class="text-center mt-3">
+                  <div class="text-subtitle-1 font-weight-bold">{{ wardrobe.wornEntry('pet')?.item.name }}</div>
+                  <div class="text-body-2 text-medium-emphasis">Your companion</div>
+                </div>
               </div>
-              <v-btn variant="text" @click="toggleAccessory(equipped.pet)">Unequip</v-btn>
-            </v-card>
-            <v-card v-else rounded="lg" border elevation="0" class="pa-8 text-center">
-              <div class="text-h2 mb-3">🐾</div>
-              <div class="text-subtitle-1 font-weight-bold">No companion equipped</div>
-              <p class="text-body-2 text-medium-emphasis mt-1 mb-4">Choose the fox companion in Avatar accessories to see it here.</p>
-              <v-btn color="primary" @click="activeTab = 'Avatar'">Browse accessories</v-btn>
-            </v-card>
-          </div>
+            </v-col>
+            <v-col cols="12" md="7" class="pt-6 pt-md-0">
+              <WardrobePanel :wardrobe="wardrobe" :slots="petSlots" />
+            </v-col>
+          </v-row>
         </v-window-item>
 
         <v-window-item value="Stats">
@@ -154,11 +138,14 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import api from '../api'
 import { getInitial } from '../utils/user'
 import AvatarFigure from '../components/avatar/AvatarFigure.vue'
-import { DEFAULT_BODY_TYPE, readAppearance, writeAppearance } from '../components/avatar/avatarStorage'
+import PetFigure from '../components/avatar/PetFigure.vue'
+import WardrobePanel from '../components/avatar/WardrobePanel.vue'
+import { SLOT_ORDER, SLOTS } from '../components/avatar/wardrobeCatalog'
+import { useWardrobe } from '../composables/useWardrobe'
 
 const user = ref(null)
 const stats = ref({ level: 1, xp: 0, coins: 0, xpIntoLevel: 0, levelProgress: 0, completedThisWeek: 0 })
@@ -167,62 +154,35 @@ const snackbar = ref(false)
 const message = ref('')
 const activeTab = ref('Avatar')
 const tabs = ['Avatar', 'Home', 'Pets', 'Stats']
-const characterStyle = ref(DEFAULT_BODY_TYPE)
 const characterOptions = [
   { label: 'Feminine', value: 'feminine' },
   { label: 'Masculine', value: 'masculine' },
   { label: 'Neutral', value: 'neutral' },
 ]
-const accessories = [
-  { id: 'cap', label: 'Cap', icon: '🧢', slot: 'hat' },
-  { id: 'hoodie', label: 'Hoodie', icon: '🧥', slot: 'clothing' },
-  { id: 'headphones', label: 'Headphones', icon: '🎧', slot: 'headphones' },
-  { id: 'fox', label: 'Fox companion', icon: '🦊', slot: 'pet' },
-  { id: 'sneakers', label: 'Sneakers', icon: '👟', slot: 'shoes' },
-  { id: 'backpack', label: 'Backpack', icon: '🎒', slot: 'backpack' },
-]
-const equipped = ref({ hat: null, clothing: null, headphones: null, pet: null, shoes: null, backpack: null })
+
+// Wardrobe state (owned items, what is worn, coins) and its auto-save live in the composable.
+const wardrobe = reactive(useWardrobe())
+const avatarSlots = SLOT_ORDER.filter((slot) => !SLOTS[slot].pet)
+const petSlots = SLOT_ORDER.filter((slot) => SLOTS[slot].pet)
+const petEquipped = computed(() => ({ pet: wardrobe.equipped.pet, petHat: wardrobe.equipped.petHat, petNeck: wardrobe.equipped.petNeck }))
 
 onMounted(async () => {
+  let me = null
   try {
-    const [me, statData] = await Promise.all([api.users.me(), api.users.stats()])
-    user.value = me
+    const [profile, statData] = await Promise.all([api.users.me(), api.users.stats()])
+    me = profile
+    user.value = profile
     stats.value = { ...stats.value, ...statData }
-    restoreAppearance()
   } catch (err) {
     notify(err?.message || 'Unable to load profile data.')
   }
+  // The wardrobe still loads when the API is down, using the guest slot.
+  await wardrobe.load(me, stats.value.coins ?? 0)
 })
-
-watch([characterStyle, equipped], () => {
-  if (!user.value) return
-  writeAppearance(user.value, { characterStyle: characterStyle.value, equipped: equipped.value })
-}, { deep: true })
-
-function restoreAppearance() {
-  const saved = readAppearance(user.value)
-  if (!saved) return
-  if (characterOptions.some((option) => option.value === saved.characterStyle)) characterStyle.value = saved.characterStyle
-  for (const slot of Object.keys(equipped.value)) {
-    const savedItem = saved.equipped?.[slot]
-    equipped.value[slot] = accessories.find((item) => item.id === savedItem?.id) || null
-  }
-}
 
 function notify(text) {
   message.value = text
   snackbar.value = true
-}
-
-function toggleAccessory(item) {
-  const slot = item.slot
-  equipped.value[slot] = equipped.value[slot]?.id === item.id ? null : item
-  notify(equipped.value[slot] ? `${item.label} equipped` : `${item.label} removed`)
-}
-
-function clearEquipment() {
-  for (const slot of Object.keys(equipped.value)) equipped.value[slot] = null
-  notify('All accessories removed')
 }
 </script>
 
@@ -238,10 +198,8 @@ function clearEquipment() {
 .avatar-scene { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
 .avatar-preview-wrap { max-width: 100%; }
 
-.accessory-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.accessory-option { min-height: 78px; height: auto; padding: 10px 12px; justify-content: flex-start; text-transform: none; letter-spacing: normal; }
-.accessory-icon { font-size: 27px; margin-right: 10px; }
-.accessory-label { white-space: normal; text-align: left; font-size: 13px; }
+.pet-stage { height: 380px; }
+.pet-preview { width: 70%; height: 70%; }
 @media (max-width: 600px) {
   .cover { height: 150px; }
   .profile-main { align-items: flex-end; gap: 14px !important; }
@@ -249,6 +207,5 @@ function clearEquipment() {
   .profile-heading h1 { font-size: 1.35rem !important; line-height: 1.3; }
   .profile-heading p { font-size: 0.8rem; }
   .avatar-stage { height: 390px; }
-  .accessory-grid { grid-template-columns: 1fr; }
 }
 </style>

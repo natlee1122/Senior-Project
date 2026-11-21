@@ -93,14 +93,7 @@ export function clampPosition(def, x, y) {
 
 export const clampAvatarPosition = (x, y) => ({ x: clamp(x, AVATAR_RANGE.x), y: clamp(y, AVATAR_RANGE.y) })
 
-/** Lightens (positive) or darkens (negative) a #rrggbb colour by a percentage. */
-export function shade(hex, percent) {
-  const n = parseInt(hex.slice(1), 16)
-  const target = percent < 0 ? 0 : 255
-  const p = Math.abs(percent) / 100
-  const channel = (shift) => Math.round(((n >> shift) & 255) * (1 - p) + target * p)
-  return `#${[16, 8, 0].map((s) => channel(s).toString(16).padStart(2, '0')).join('')}`
-}
+export { shade } from '../../utils/color'
 
 export const newUid = (id) => `${id}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`
 
