@@ -90,7 +90,7 @@ const route = useRoute()
 const room = reactive(useRoom())
 const wardrobe = reactive(useWardrobe())
 
-// The closet and the room editor link here with ?section=…&category=…
+// The closet and the room editor link here with ?section=...&category=...
 const startSection = SECTIONS.some((s) => s.id === route.query.section) ? route.query.section : 'clothing'
 const SHOP_TABS = [
   { value: 'catalog', label: 'Catalog', icon: '🛍️' },
