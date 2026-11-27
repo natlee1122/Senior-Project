@@ -14,6 +14,11 @@
         <span class="dock-icon">{{ section.icon }}</span>
         <span class="dock-label">{{ section.label }}</span>
       </button>
+      <!-- Leaving edit mode is one tap away, right where you are working -->
+      <button v-if="editing" type="button" class="dock-btn dock-btn--done" @click="emit('done')">
+        <span class="dock-icon">✓</span>
+        <span class="dock-label">Done</span>
+      </button>
     </nav>
 
     <!-- The panel slides out to the right of the rail, over the room -->
@@ -21,7 +26,7 @@
       <section v-show="open" class="dock-panel" :aria-label="current.label">
         <header class="dock-header">
           <span class="font-weight-bold">{{ current.icon }} {{ current.label }}</span>
-          <v-btn icon="mdi-chevron-left" size="small" variant="text" aria-label="Collapse panel" @click="open = false" />
+          <v-btn icon="mdi-close" size="small" variant="text" aria-label="Close panel" @click="open = false" />
         </header>
 
         <div class="dock-body">
@@ -36,9 +41,9 @@
                 :tier="row.def.price"
                 :dim="row.available <= 0"
                 :caption="row.available <= 0 ? 'All placed' : `${row.available} to place`"
-                @click="room.place(row.def.id)"
+                @click="place(row.def.id)"
               >
-                <ItemPreview :type="row.def.id" :size="68" />
+                <ItemPreview :type="row.def.id" :size="60" />
               </ItemCell>
             </div>
             <p v-else class="text-body-2 text-medium-emphasis py-4 text-center">Nothing here yet. Visit the Shop.</p>
@@ -50,7 +55,7 @@
             <CategoryBar v-model="category" :categories="categories" label="Furniture category" />
             <div class="cell-grid">
               <ItemCell v-for="def in shopItems" :key="def.id" :name="def.name" :tier="def.price" :price="def.price" @click="confirming = def">
-                <ItemPreview :type="def.id" :size="68" />
+                <ItemPreview :type="def.id" :size="60" />
               </ItemCell>
             </div>
             <v-btn block variant="text" size="small" class="mt-2" to="/inventory?section=furniture">Open the full shop →</v-btn>
@@ -118,7 +123,10 @@ import { FLOORS, FURNITURE_LIST, LIGHTING, ROOM_THEMES, WALLS } from './furnitur
 const props = defineProps({
   // The object returned by useRoom(), wrapped in reactive()
   room: { type: Object, required: true },
+  editing: { type: Boolean, default: false },
 })
+// 'start' fires when a section is opened (the page switches to edit mode); 'done' leaves edit mode
+const emit = defineEmits(['start', 'done'])
 const open = defineModel('open', { type: Boolean, default: true })
 const tab = defineModel('tab', { type: String, default: 'items' })
 
@@ -150,6 +158,12 @@ function toggle(value) {
   }
   tab.value = value
   open.value = true
+  emit('start')
+}
+
+// The panel gets out of the way once a piece is placed, so you can see and move it straight away.
+function place(id) {
+  if (props.room.place(id)) open.value = false
 }
 
 function buy(def) {
@@ -161,7 +175,7 @@ function buy(def) {
 }
 
 function placeBought() {
-  if (lastBoughtId.value) props.room.place(lastBoughtId.value)
+  if (lastBoughtId.value) place(lastBoughtId.value)
   snackbar.value = false
 }
 
@@ -180,11 +194,13 @@ function reset() {
 .dock-btn:hover { background: rgb(var(--v-theme-primary), 0.1); }
 .dock-btn:focus-visible { outline: 2px solid rgb(var(--v-theme-primary)); outline-offset: 1px; }
 .dock-btn--active { border-color: rgb(var(--v-theme-primary)); background: rgb(var(--v-theme-primary), 0.14); }
+.dock-btn--done { margin-top: 4px; border-color: rgb(var(--v-theme-primary)); background: rgb(var(--v-theme-primary)); color: #fff; }
+.dock-btn--done:hover { background: rgb(var(--v-theme-primary)); filter: brightness(1.08); }
 .dock-icon { font-size: 24px; line-height: 1.2; }
 .dock-label { font-size: 10px; font-weight: 700; line-height: 1.15; text-align: center; }
 
-.dock-panel { display: flex; flex-direction: column; width: 330px; max-width: calc(100vw - 112px); overflow: hidden; border-radius: 20px; }
+.dock-panel { display: flex; flex-direction: column; width: 300px; max-width: calc(100vw - 112px); overflow: hidden; border-radius: 20px; }
 .dock-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 8px 4px 16px; }
 .dock-body { flex: 1; min-height: 0; padding: 4px 14px 14px; overflow-y: auto; }
-.cell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; padding: 2px 2px 8px; }
+.cell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; padding: 2px 2px 8px; }
 </style>

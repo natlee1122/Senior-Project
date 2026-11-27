@@ -1,5 +1,5 @@
 <template>
-  <div v-if="room.selectedKey" class="bar" :style="{ left: `calc(50% + ${offset / 2}px)` }">
+  <div v-if="room.selectedKey" class="bar" :style="{ left: `calc(50% + ${(offset - HUD_WIDTH) / 2}px)`, maxWidth: `calc(100% - ${offset + HUD_WIDTH}px)` }">
     <span class="font-weight-bold">{{ name }}</span>
     <template v-if="!isAvatar">
       <v-btn size="small" variant="tonal" prepend-icon="mdi-flip-horizontal" @click="room.flipSelected()">Flip</v-btn>
@@ -10,7 +10,6 @@
     </template>
     <span v-else class="text-caption">Drag to move your character</span>
   </div>
-  <div v-else class="hint" :style="{ left: `calc(50% + ${offset / 2}px)` }">Drag items to move them · pick something from the left</div>
 </template>
 
 <script setup>
@@ -24,6 +23,9 @@ const props = defineProps({
   offset: { type: Number, default: 0 },
 })
 
+// Space taken by the save status and coins at the top right; the bar stays clear of them
+const HUD_WIDTH = 190
+
 const isAvatar = computed(() => props.room.selectedKey === 'avatar')
 const name = computed(() => (isAvatar.value ? 'You' : props.room.selectedDef?.name ?? ''))
 const colorOptions = computed(() => (props.room.selectedDef?.colors ?? []).map((color) => ({ value: color, label: color, color })))
@@ -31,7 +33,6 @@ const colorOptions = computed(() => (props.room.selectedDef?.colors ?? []).map((
 
 <style scoped>
 /* A floating toolbar along the top of the room, where it never covers the furniture on the floor */
-.bar, .hint { position: absolute; top: 14px; z-index: 5; width: max-content; transform: translateX(-50%); max-width: calc(100% - 24px); border-radius: 22px; background: rgb(var(--v-theme-surface), 0.95); box-shadow: 0 4px 16px rgb(0 0 0 / 20%); backdrop-filter: blur(6px); }
+.bar { position: absolute; top: 14px; z-index: 5; width: max-content; transform: translateX(-50%); border-radius: 22px; background: rgb(var(--v-theme-surface), 0.95); box-shadow: 0 4px 16px rgb(0 0 0 / 20%); backdrop-filter: blur(6px); }
 .bar { display: flex; align-items: center; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 8px 16px; }
-.hint { padding: 6px 16px; font-size: 12px; font-weight: 600; color: rgb(var(--v-theme-on-surface), 0.7); white-space: nowrap; pointer-events: none; }
 </style>

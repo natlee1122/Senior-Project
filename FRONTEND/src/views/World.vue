@@ -18,14 +18,14 @@
               :editing="editing"
               :selected-key="room.selectedKey"
               :bubble="bubbleOpen ? greeting : ''"
-              @select="room.select"
+              @select="onSelect"
               @move="({ key, x, y }) => room.moveEntity(key, x, y)"
               @remove="room.removeSelected"
               @avatar-click="greet"
             />
             <!-- While editing, the tools sit on top of the room: a dock on the left and a toolbar below -->
+            <RoomDock v-if="room.ready" v-model:open="dockOpen" v-model:tab="editorTab" :room="room" :editing="editing" @start="editing = true" @done="stopEditing" />
             <template v-if="editing && room.ready">
-              <RoomDock v-model:open="dockOpen" v-model:tab="editorTab" :room="room" />
               <SelectionBar :room="room" :offset="dockOpen ? DOCK_OPEN_WIDTH : DOCK_RAIL_WIDTH" />
               <div class="hud">
                 <v-chip size="small" variant="flat" color="surface" :prepend-icon="room.saveStatus === 'saving' ? 'mdi-sync' : 'mdi-check'">{{ room.saveStatus === 'saving' ? 'Saving…' : 'Saved' }}</v-chip>
@@ -87,10 +87,10 @@ const equipped = ref({})
 
 const editing = ref(false)
 const editorTab = ref('items')
-const dockOpen = ref(true)
+const dockOpen = ref(false) // the panel starts folded; only the icon rail is visible
 // Space the dock takes on the left, so the toolbar can centre itself in the rest of the room
 const DOCK_RAIL_WIDTH = 88
-const DOCK_OPEN_WIDTH = 426
+const DOCK_OPEN_WIDTH = 396
 
 const snackbar = ref(false)
 const message = ref('')
@@ -143,6 +143,12 @@ function applyAppearance() {
   equipped.value = upgradeEquipped(saved?.equipped)
 }
 
+// Touching anything in the room means the panel is no longer needed, so it folds away.
+function onSelect(key) {
+  room.select(key)
+  dockOpen.value = false
+}
+
 function startEditing(tab = 'items') {
   editorTab.value = tab
   dockOpen.value = true
@@ -152,6 +158,7 @@ function startEditing(tab = 'items') {
 
 async function stopEditing() {
   editing.value = false
+  dockOpen.value = false
   room.select(null)
   await room.flushSave()
   notify('Room saved.')
