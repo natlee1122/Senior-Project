@@ -2,7 +2,7 @@
   <button
     type="button"
     class="cell"
-    :class="{ 'cell--worn': worn, 'cell--locked': locked, 'cell--selected': selected }"
+    :class="{ 'cell--worn': worn, 'cell--locked': locked || dim, 'cell--selected': selected }"
     :style="{ '--rarity': rarity.color }"
     :aria-pressed="worn || selected"
     :title="rarity.label"
@@ -28,7 +28,8 @@ const props = defineProps({
   caption: { type: String, default: '' },
   tier: { type: Number, default: 0 }, // price used to pick the rarity colour
   worn: { type: Boolean, default: false },
-  locked: { type: Boolean, default: false },
+  locked: { type: Boolean, default: false }, // greyed out with a padlock
+  dim: { type: Boolean, default: false }, // greyed out without a padlock
   fresh: { type: Boolean, default: false },
   selected: { type: Boolean, default: false },
 })

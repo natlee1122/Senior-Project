@@ -2,86 +2,66 @@
   <div class="closet">
     <GameTabs v-if="outfits" v-model="view" :tabs="VIEWS" class="mb-4" />
 
-    <WoodCabinet>
-      <!-- Brass tags, one per section of the wardrobe -->
-      <template v-if="view === 'items'" #tags>
-        <button
-          v-for="category in categories"
-          :key="category.id"
-          type="button"
-          class="tag"
-          :class="{ 'tag--active': slot === category.id }"
-          :aria-pressed="slot === category.id"
-          @click="slot = category.id"
-        >
-          <span class="tag-icon">{{ category.icon }}</span>
-          <span class="tag-label">{{ category.label }}</span>
-          <span class="tag-count">{{ category.count }}</span>
-          <span v-if="category.badge" class="tag-dot" aria-label="New items" />
-        </button>
-      </template>
+    <!-- ITEMS: everything in a category; items you do not own yet are locked -->
+    <template v-if="view === 'items'">
+      <div class="d-flex align-center ga-3 mb-2">
+        <div class="flex-grow-1">
+          <div class="d-flex justify-space-between text-caption font-weight-bold mb-1">
+            <span>Collection</span><span>{{ progress.owned }} / {{ progress.total }}</span>
+          </div>
+          <v-progress-linear :model-value="progress.percent" color="gold" bg-color="surface-variant" height="10" rounded />
+        </div>
+        <v-btn v-if="outfits" icon="mdi-dice-multiple" variant="tonal" color="primary" size="small" aria-label="Surprise me" title="Surprise me" @click="wardrobe.shuffle()" />
+        <v-chip color="gold" size="small" class="font-weight-bold">● {{ wardrobe.coins }}</v-chip>
+      </div>
 
-      <!-- ITEMS: one compartment per piece -->
-      <template v-if="view === 'items'">
-        <Cubby
+      <CategoryBar v-model="slot" :categories="categories" :allow-all="false" label="Closet category" />
+
+      <div v-if="worn" class="d-flex align-center flex-wrap ga-3 mb-3">
+        <span class="text-caption font-weight-bold">{{ worn.item.name }}</span>
+        <SwatchRow v-if="worn.item.colors.length > 1" :options="colorOptions" :model-value="worn.color" label="Item colour" @update:model-value="wardrobe.setColor(slot, $event)" />
+        <v-btn v-if="!SLOTS[slot].required" variant="text" size="small" class="ml-auto" @click="wardrobe.unequip(slot)">Take off</v-btn>
+      </div>
+
+      <div class="cell-grid">
+        <ItemCell
           v-for="item in items"
           :key="item.id"
           :name="item.name"
-          :hang="hanging"
           :tier="item.price"
           :worn="wardrobe.isWorn(item.id)"
           :locked="!wardrobe.isOwned(item.id)"
           :fresh="Boolean(wardrobe.fresh[item.id])"
-          :price="wardrobe.isOwned(item.id) ? 0 : item.price"
+          :price="wardrobe.isOwned(item.id) ? null : item.price"
+          :caption="wardrobe.isWorn(item.id) ? 'Wearing' : ''"
           @click="onCell(item)"
         >
-          <ItemThumb :item="item" :color="colorFor(item)" :body-type="wardrobe.characterStyle" :size="96" />
-        </Cubby>
-        <Cubby v-for="n in fillers" :key="`filler${n}`" empty blank />
-      </template>
+          <ItemThumb :item="item" :color="colorFor(item)" :body-type="wardrobe.characterStyle" :size="88" />
+        </ItemCell>
+      </div>
+      <div class="text-center mt-3">
+        <v-btn variant="text" size="small" :to="shopLink">Browse this category in the Shop →</v-btn>
+      </div>
+    </template>
 
-      <!-- OUTFITS: tall compartments, each holding a complete look -->
-      <template v-else>
-        <Cubby
-          v-for="outfit in wardrobe.outfits"
-          :key="outfit.id"
-          :name="outfit.name"
-          tall
-          @click="wardrobe.wearOutfit(outfit.id)"
-        >
-          <AvatarFigure :standalone="false" :width="91" :height="160" view-box="40 28 160 282" :body-type="wardrobe.characterStyle" :equipped="outfit.equipped" />
-          <v-btn class="outfit-delete" icon="mdi-close" size="x-small" variant="flat" color="#f3e6c8" :aria-label="`Delete ${outfit.name}`" @click.stop="wardrobe.deleteOutfit(outfit.id)" />
-        </Cubby>
-        <Cubby v-for="n in emptySlots" :key="`empty${n}`" tall empty />
-      </template>
-
-      <template #drawer>
-        <template v-if="view === 'items'">
-          <div v-if="worn" class="drawer-row mb-2">
-            <span class="text-caption font-weight-bold">{{ worn.item.name }}</span>
-            <SwatchRow v-if="worn.item.colors.length > 1" :options="colorOptions" :model-value="worn.color" label="Item colour" @update:model-value="wardrobe.setColor(slot, $event)" />
-            <v-btn v-if="!SLOTS[slot].required" variant="text" size="x-small" class="ml-auto drawer-btn" @click="wardrobe.unequip(slot)">Take off</v-btn>
-          </div>
-          <div class="drawer-row">
-            <div class="flex-grow-1">
-              <div class="d-flex justify-space-between text-caption font-weight-bold mb-1"><span>Collection</span><span>{{ progress.owned }} / {{ progress.total }}</span></div>
-              <v-progress-linear :model-value="progress.percent" color="gold" bg-color="#5a3820" height="9" rounded />
-            </div>
-            <v-btn v-if="outfits" icon="mdi-dice-multiple" size="small" variant="flat" color="#f3e6c8" aria-label="Surprise me" title="Surprise me" @click="wardrobe.shuffle()" />
-            <v-chip color="gold" size="small" class="font-weight-bold">● {{ wardrobe.coins }}</v-chip>
-          </div>
-        </template>
-        <div v-else class="drawer-row">
-          <v-text-field v-model="outfitName" placeholder="Name this look" maxlength="20" density="compact" variant="solo" bg-color="#f3e6c8" hide-details :disabled="wardrobe.isOutfitFull" />
-          <v-btn color="gold" variant="flat" :disabled="wardrobe.isOutfitFull" @click="saveOutfit">Save</v-btn>
+    <!-- OUTFITS: save the current look and swap between looks in one tap -->
+    <template v-else>
+      <div class="d-flex ga-2 mb-4">
+        <v-text-field v-model="outfitName" label="Name this look" maxlength="20" density="comfortable" variant="outlined" hide-details :disabled="wardrobe.isOutfitFull" />
+        <v-btn color="primary" size="large" :disabled="wardrobe.isOutfitFull" @click="saveOutfit">Save</v-btn>
+      </div>
+      <div class="cell-grid cell-grid--outfits">
+        <div v-for="outfit in wardrobe.outfits" :key="outfit.id" class="outfit-card">
+          <button type="button" class="outfit-wear" :aria-label="`Wear ${outfit.name}`" @click="wardrobe.wearOutfit(outfit.id)">
+            <AvatarFigure :standalone="false" :width="91" :height="160" view-box="40 28 160 282" :body-type="wardrobe.characterStyle" :equipped="outfit.equipped" />
+            <span class="text-caption font-weight-bold">{{ outfit.name }}</span>
+          </button>
+          <v-btn class="outfit-delete" icon="mdi-close" size="x-small" variant="text" :aria-label="`Delete ${outfit.name}`" @click="wardrobe.deleteOutfit(outfit.id)" />
         </div>
-      </template>
-    </WoodCabinet>
-
-    <p v-if="view === 'outfits'" class="text-caption text-medium-emphasis mt-3">Outfits keep your clothes, hair and accessories. Your companion stays as it is.</p>
-    <div v-else class="text-center mt-3">
-      <v-btn variant="text" size="small" :to="shopLink">Browse this category in the Shop →</v-btn>
-    </div>
+        <div v-for="n in emptySlots" :key="`empty${n}`" class="outfit-card outfit-card--empty">Empty</div>
+      </div>
+      <p class="text-caption text-medium-emphasis mt-3">Outfits keep your clothes, hair and accessories. Your companion stays as it is.</p>
+    </template>
 
     <!-- Unlock a locked item without leaving the closet -->
     <v-dialog v-model="unlocking" max-width="340">
@@ -102,10 +82,10 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
-import Cubby from '../game/Cubby.vue'
+import CategoryBar from '../game/CategoryBar.vue'
 import GameTabs from '../game/GameTabs.vue'
+import ItemCell from '../game/ItemCell.vue'
 import { rarityOf } from '../game/rarity'
-import WoodCabinet from '../game/WoodCabinet.vue'
 import { SLOT_ICONS, sectionOfSlot } from '../shop/shopCatalog'
 import SwatchRow from '../world/SwatchRow.vue'
 import AvatarFigure from './AvatarFigure.vue'
@@ -115,7 +95,7 @@ import { SLOTS, itemsForSlot } from './wardrobeCatalog'
 const props = defineProps({
   // The object returned by useWardrobe(), wrapped in reactive()
   wardrobe: { type: Object, required: true },
-  // Which sections to show, in order
+  // Which categories to show, in order
   slots: { type: Array, required: true },
   // Show the Outfits tab and the shuffle button (they apply to clothing, not companions)
   outfits: { type: Boolean, default: false },
@@ -125,7 +105,6 @@ const VIEWS = [
   { value: 'items', label: 'Items', icon: '👕' },
   { value: 'outfits', label: 'Outfits', icon: '✨' },
 ]
-const HANGING = ['top', 'outer', 'bottom', 'neck']
 const OUTFIT_SLOTS = 6
 
 const view = ref('items')
@@ -139,15 +118,12 @@ const message = ref('')
 watch(() => props.slots, (value) => { if (!value.includes(slot.value)) slot.value = value[0] })
 
 const slotItems = (key) => itemsForSlot(key)
-const hanging = computed(() => HANGING.includes(slot.value))
-// Owned pieces come first, then what can still be unlocked, cheapest first.
+// Owned items first, then by price, so what you can wear comes before what you can unlock.
 const items = computed(() => [...slotItems(slot.value)].sort((a, b) => Number(props.wardrobe.isOwned(b.id)) - Number(props.wardrobe.isOwned(a.id)) || a.price - b.price))
 const worn = computed(() => props.wardrobe.wornEntry(slot.value))
 const colorOptions = computed(() => (worn.value?.item.colors ?? []).map((color) => ({ value: color, label: color, color })))
 const shopLink = computed(() => `/inventory?section=${sectionOfSlot(slot.value)}&category=${slot.value}`)
 const targetRarity = computed(() => rarityOf(target.value?.price ?? 0))
-// Pad the last row so the cabinet always looks full
-const fillers = computed(() => (3 - (items.value.length % 3)) % 3)
 const emptySlots = computed(() => Math.max(0, OUTFIT_SLOTS - props.wardrobe.outfits.length))
 
 const categories = computed(() => props.slots.map((key) => ({
@@ -196,21 +172,13 @@ function saveOutfit() {
 
 <style scoped>
 .closet { min-width: 0; }
+.cell-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 10px; }
+.cell-grid--outfits { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
 
-/* Brass name plates under the cornice */
-.tag {
-  position: relative; flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1px; width: 62px; padding: 5px 2px 4px;
-  border: 2px solid #8a6b1f; border-radius: 8px; background: linear-gradient(#f1d98a, #c9a24a); color: #4a2f12; cursor: pointer;
-  box-shadow: 0 3px 0 #7a5a18; transition: transform 120ms ease;
-}
-.tag:focus-visible { outline: 2px solid #fff3c4; outline-offset: 2px; }
-.tag--active { background: linear-gradient(#ffeaa6, #f1c65b); box-shadow: 0 1px 0 #7a5a18, 0 0 0 2px #fff3c4; transform: translateY(2px); }
-.tag-icon { font-size: 22px; line-height: 1.2; }
-.tag-label { font-size: 10px; font-weight: 800; line-height: 1.15; text-align: center; }
-.tag-count { position: absolute; top: 2px; right: 3px; min-width: 15px; padding: 0 4px; border-radius: 8px; background: #5a3820; color: #fbe9c8; font-size: 10px; font-weight: 700; line-height: 15px; }
-.tag-dot { position: absolute; top: 3px; left: 4px; width: 9px; height: 9px; border: 2px solid #fff; border-radius: 50%; background: #ef476f; }
-
-.drawer-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
-.drawer-btn { color: #fbe9c8; }
-.outfit-delete { position: absolute; top: 4px; right: 4px; z-index: 2; }
+.outfit-card { position: relative; display: flex; align-items: center; justify-content: center; min-height: 196px; border: 2px solid rgb(var(--v-theme-on-surface), 0.1); border-radius: 18px; background: rgb(var(--v-theme-surface)); box-shadow: 0 3px 0 rgb(var(--v-theme-on-surface), 0.08); }
+.outfit-card--empty { border-style: dashed; box-shadow: none; color: rgb(var(--v-theme-on-surface), 0.35); font-size: 12px; font-weight: 700; }
+.outfit-wear { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; padding: 8px 4px; border: 0; background: none; color: inherit; cursor: pointer; }
+.outfit-wear:hover { transform: translateY(-2px); }
+.outfit-wear:focus-visible { outline: 3px solid rgb(var(--v-theme-primary)); outline-offset: 2px; border-radius: 16px; }
+.outfit-delete { position: absolute; top: 2px; right: 2px; }
 </style>

@@ -7,27 +7,36 @@
 
     <v-card rounded="xxl" class="overflow-hidden">
       <v-row no-gutters>
-        <v-col cols="12" md="8">
-          <v-skeleton-loader v-if="!room.ready" type="image" class="room-skeleton" />
-          <RoomScene
-            v-else
-            :layout="room.state"
-            :body-type="bodyType"
-            :equipped="equipped"
-            :editing="editing"
-            :selected-key="room.selectedKey"
-            :bubble="bubbleOpen ? greeting : ''"
-            @select="room.select"
-            @move="({ key, x, y }) => room.moveEntity(key, x, y)"
-            @remove="room.removeSelected"
-            @avatar-click="greet"
-          />
+        <v-col cols="12" :md="editing ? 12 : 8">
+          <div class="stage">
+            <v-skeleton-loader v-if="!room.ready" type="image" class="room-skeleton" />
+            <RoomScene
+              v-else
+              :layout="room.state"
+              :body-type="bodyType"
+              :equipped="equipped"
+              :editing="editing"
+              :selected-key="room.selectedKey"
+              :bubble="bubbleOpen ? greeting : ''"
+              @select="room.select"
+              @move="({ key, x, y }) => room.moveEntity(key, x, y)"
+              @remove="room.removeSelected"
+              @avatar-click="greet"
+            />
+            <!-- While editing, the tools sit on top of the room: a dock on the left and a toolbar below -->
+            <template v-if="editing && room.ready">
+              <RoomDock v-model:open="dockOpen" v-model:tab="editorTab" :room="room" />
+              <SelectionBar :room="room" :offset="dockOpen ? DOCK_OPEN_WIDTH : DOCK_RAIL_WIDTH" />
+              <div class="hud">
+                <v-chip size="small" variant="flat" color="surface" :prepend-icon="room.saveStatus === 'saving' ? 'mdi-sync' : 'mdi-check'">{{ room.saveStatus === 'saving' ? 'Saving…' : 'Saved' }}</v-chip>
+                <v-chip color="gold" size="small" variant="flat" class="font-weight-bold">● {{ room.coins }}</v-chip>
+              </div>
+            </template>
+          </div>
         </v-col>
 
-        <v-col cols="12" md="4" class="pa-6 pa-md-8">
-          <RoomEditorPanel v-if="editing" v-model:tab="editorTab" :room="room" />
-
-          <div v-else class="d-flex flex-column justify-center h-100">
+        <v-col v-if="!editing" cols="12" md="4" class="pa-6 pa-md-8">
+          <div class="d-flex flex-column justify-center h-100">
             <div><v-chip size="x-small" class="font-weight-bold">MY HOME</v-chip></div>
             <h2 class="text-h5 my-3">{{ displayName }}'s little place</h2>
             <p class="text-body-2 text-muted world-text mb-6">A quiet place to come back to. Tap your character to say hi, or edit the room to make it yours.</p>
@@ -60,8 +69,9 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import api from '../api'
 import PageHeading from '../components/PageHeading.vue'
-import RoomEditorPanel from '../components/world/RoomEditorPanel.vue'
+import RoomDock from '../components/world/RoomDock.vue'
 import RoomScene from '../components/world/RoomScene.vue'
+import SelectionBar from '../components/world/SelectionBar.vue'
 import { BODY_PRESETS } from '../components/avatar/avatarBodies'
 import { DEFAULT_BODY_TYPE, readAppearance } from '../components/avatar/avatarStorage'
 import { ITEMS_BY_ID, upgradeEquipped } from '../components/avatar/wardrobeCatalog'
@@ -77,6 +87,10 @@ const equipped = ref({})
 
 const editing = ref(false)
 const editorTab = ref('items')
+const dockOpen = ref(true)
+// Space the dock takes on the left, so the toolbar can centre itself in the rest of the room
+const DOCK_RAIL_WIDTH = 88
+const DOCK_OPEN_WIDTH = 426
 
 const snackbar = ref(false)
 const message = ref('')
@@ -131,6 +145,7 @@ function applyAppearance() {
 
 function startEditing(tab = 'items') {
   editorTab.value = tab
+  dockOpen.value = true
   bubbleOpen.value = false
   editing.value = true
 }
@@ -156,6 +171,8 @@ function notify(text) {
 </script>
 
 <style scoped>
+.stage { position: relative; }
+.hud { position: absolute; top: 12px; right: 12px; z-index: 5; display: flex; gap: 8px; }
 .room-skeleton { aspect-ratio: 16 / 9; width: 100%; }
 .world-text { line-height: 1.7; }
 .detail-icon { display: inline-block; width: 28px; text-align: center; font-size: 17px; }

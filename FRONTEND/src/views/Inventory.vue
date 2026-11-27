@@ -18,28 +18,59 @@
             </v-btn-toggle>
             <v-text-field v-model="search" prepend-inner-icon="mdi-magnify" placeholder="Search the catalog…" variant="outlined" density="comfortable" hide-details clearable class="shop-search" />
           </div>
-          <CategoryBar v-model="category" :categories="categories" />
-          <v-switch v-if="tab === 'catalog'" v-model="hideOwned" label="Hide items I own" density="compact" color="primary" hide-details class="mb-2" />
-
           <div v-if="!ready" class="text-body-2 text-medium-emphasis py-8 text-center">Loading…</div>
-          <div v-else-if="visible.length" class="shop-grid">
-            <ItemCell
+
+          <!-- Furniture is not clothing, so it keeps the card grid -->
+          <template v-else-if="section === 'furniture'">
+            <CategoryBar v-model="category" :categories="categories" />
+            <v-switch v-if="tab === 'catalog'" v-model="hideOwned" label="Hide items I own" density="compact" color="primary" hide-details class="mb-2" />
+            <div v-if="visible.length" class="shop-grid">
+              <ItemCell
+                v-for="entry in visible"
+                :key="entry.key"
+                :name="entry.name"
+                :tier="entry.price"
+                :selected="entry.key === selectedKey"
+                :price="isOwned(entry) ? null : entry.price"
+                :caption="caption(entry)"
+                @click="select(entry)"
+              >
+                <ItemPreview :type="entry.id" :size="88" />
+              </ItemCell>
+            </div>
+          </template>
+
+          <!-- Clothing and companions are shelved in a wooden wardrobe -->
+          <WoodCabinet v-else :columns="5">
+            <template #tags>
+              <BrassTags v-model="category" :categories="categories" allow-all label="Wardrobe section" />
+            </template>
+            <Cubby
               v-for="entry in visible"
               :key="entry.key"
               :name="entry.name"
+              :hang="HANGING.includes(entry.category)"
               :tier="entry.price"
-              :selected="entry.key === selectedKey"
-              :worn="entry.section !== 'furniture' && wardrobe.isWorn(entry.id)"
-              :fresh="entry.section !== 'furniture' && Boolean(wardrobe.fresh[entry.id])"
-              :price="isOwned(entry) ? null : entry.price"
-              :caption="caption(entry)"
+              :lit="entry.key === selectedKey"
+              :worn="wardrobe.isWorn(entry.id)"
+              :fresh="Boolean(wardrobe.fresh[entry.id])"
+              :stamp="isOwned(entry) && !wardrobe.isWorn(entry.id) ? 'OWNED' : ''"
+              :price="isOwned(entry) ? 0 : entry.price"
               @click="select(entry)"
             >
-              <ItemPreview v-if="entry.section === 'furniture'" :type="entry.id" :size="88" />
-              <ItemThumb v-else :item="entry.def" :body-type="wardrobe.characterStyle" :size="88" />
-            </ItemCell>
-          </div>
-          <v-card v-else variant="tonal" rounded="lg" class="pa-6 text-center text-body-2">
+              <ItemThumb :item="entry.def" :body-type="wardrobe.characterStyle" :size="66" />
+            </Cubby>
+            <Cubby v-for="n in fillers" :key="`filler${n}`" blank />
+            <template #drawer>
+              <div class="d-flex align-center flex-wrap ga-3">
+                <v-switch v-if="tab === 'catalog'" v-model="hideOwned" label="Hide items I own" density="compact" color="gold" hide-details />
+                <span class="text-caption font-weight-bold ml-auto">{{ visible.length }} items</span>
+                <v-chip color="gold" size="small" class="font-weight-bold">● {{ wardrobe.coins }}</v-chip>
+              </div>
+            </template>
+          </WoodCabinet>
+
+          <v-card v-if="ready && !visible.length && section === 'furniture'" variant="tonal" rounded="lg" class="pa-6 text-center text-body-2 mt-3">
             {{ tab === 'inventory' ? 'Nothing here yet. Browse the Catalog to find something you like.' : 'No items match your search.' }}
           </v-card>
         </v-col>
@@ -77,9 +108,12 @@ import { useRoute } from 'vue-router'
 import api from '../api'
 import PageHeading from '../components/PageHeading.vue'
 import ItemThumb from '../components/avatar/ItemThumb.vue'
+import BrassTags from '../components/game/BrassTags.vue'
 import CategoryBar from '../components/game/CategoryBar.vue'
+import Cubby from '../components/game/Cubby.vue'
 import GameTabs from '../components/game/GameTabs.vue'
 import ItemCell from '../components/game/ItemCell.vue'
+import WoodCabinet from '../components/game/WoodCabinet.vue'
 import ShopItemDetail from '../components/shop/ShopItemDetail.vue'
 import { SECTIONS, entriesFor } from '../components/shop/shopCatalog'
 import ItemPreview from '../components/world/ItemPreview.vue'
@@ -96,6 +130,7 @@ const SHOP_TABS = [
   { value: 'catalog', label: 'Catalog', icon: '🛍️' },
   { value: 'inventory', label: 'Inventory', icon: '🎒' },
 ]
+const HANGING = ['top', 'outer', 'bottom', 'neck'] // these hang from a rail instead of standing on a shelf
 const tab = ref('catalog')
 const section = ref(startSection)
 const category = ref(SECTIONS.find((s) => s.id === startSection).categories.some((c) => c.id === route.query.category) ? route.query.category : null)
@@ -125,6 +160,11 @@ const visible = computed(() => {
     && (!text || entry.name.toLowerCase().includes(text))
     && !(tab.value === 'catalog' && hideOwned.value && isOwned(entry)))
 })
+
+// Pad the cabinet so it always looks full, even when a category has few pieces
+const CABINET_COLUMNS = 5
+const CABINET_MIN_CELLS = 15
+const fillers = computed(() => Math.ceil(Math.max(visible.value.length, CABINET_MIN_CELLS) / CABINET_COLUMNS) * CABINET_COLUMNS - visible.value.length)
 
 const selected = computed(() => sectionEntries.value.find((entry) => entry.key === selectedKey.value) ?? null)
 
